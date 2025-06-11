@@ -1,0 +1,44 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "ftbunearthed:dev_environment"
+    }
+  ],
+  "type": "ftbunearthed:unearther",
+  "outputs": [
+    {
+      "chance": 0.1,
+      "item": {
+        "count": 1,
+        "id": "minecraft:diamond"
+      }
+    },
+    {
+      "chance": 0.1,
+      "item": {
+        "count": 1,
+        "id": "minecraft:amethyst_shard"
+      }
+    },
+    {
+      "chance": 0.1,
+      "item": {
+        "count": 1,
+        "id": "minecraft:emerald"
+      }
+    },
+    {
+      "chance": 0.2,
+      "item": {
+        "count": 1,
+        "id": "minecraft:lapis_lazuli"
+      }
+    }
+  ],
+  "tool_item": {
+    "item": "minecraft:brush"
+  },
+  "worker_item": {
+    "item": "minecraft:name_tag"
+  }
+}
