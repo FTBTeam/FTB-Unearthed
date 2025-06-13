@@ -28,6 +28,6 @@ public class MiscUtil {
     }
 
     public static DataResult<Double> validateChanceRange(double d) {
-        return d > 0.0 && d <= 1.0 ? DataResult.success(d) : DataResult.error(() -> "must be in range (0.0 -> 1.0]");
+        return d > 0.0 ? DataResult.success(d) : DataResult.error(() -> "must be > 0.0");
     }
 }

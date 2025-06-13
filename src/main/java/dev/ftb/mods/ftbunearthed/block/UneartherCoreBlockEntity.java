@@ -27,6 +27,7 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.items.wrapper.ForwardingItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import snownee.jade.addon.harvest.ToolHandler;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -128,9 +129,15 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     private boolean tryGenerateOutputs() {
         assert currentRecipe != null;
 
-        ItemStack output = currentRecipe.generateRandomItem();
-        ItemStack result = ItemHandlerHelper.insertItem(outputHandler, output, false);
-        return !ItemStack.matches(output, result);
+        boolean ok = false;
+        for (ItemStack output: currentRecipe.generateOutputs(level.random)) {
+            ItemStack result = ItemHandlerHelper.insertItemStacked(outputHandler, output, false);
+            // if nothing at all can be inserted, go into cooldown
+            if (!ItemStack.matches(output, result)) {
+                ok = true;  // at least some of the stack could be inserted
+            }
+        }
+        return ok;
     }
 
     @Override

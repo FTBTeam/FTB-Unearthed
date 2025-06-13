@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UneartherRecipe extends BaseRecipe<UneartherRecipe> {
@@ -51,10 +52,10 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> {
         return workerItem.test(workerStack) && toolItem.test(toolStack);
     }
 
-    public ItemStack generateRandomItem() {
-        return WeightedRandom.getRandomItem(RandomSource.createNewThreadLocalInstance(), outputs)
-                .map(itemWithChance -> itemWithChance.item().copy())
-                .orElse(ItemStack.EMPTY);
+    public List<ItemStack> generateOutputs(RandomSource rand) {
+        List<ItemStack> results = new ArrayList<>();
+        outputs.forEach(o -> o.tryProduce(rand, results::add));
+        return results;
     }
 
     public interface IFactory<T extends UneartherRecipe> {

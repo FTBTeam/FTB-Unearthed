@@ -9,32 +9,33 @@
     {
       "chance": 0.1,
       "item": {
-        "count": 1,
+        "count": 2,
         "id": "minecraft:diamond"
       }
     },
     {
-      "chance": 0.1,
+      "chance": 0.3,
       "item": {
         "count": 1,
         "id": "minecraft:amethyst_shard"
       }
     },
     {
-      "chance": 0.1,
+      "chance": 0.5,
       "item": {
         "count": 1,
         "id": "minecraft:emerald"
       }
     },
     {
-      "chance": 0.2,
+      "chance": 1.5,
       "item": {
         "count": 1,
         "id": "minecraft:lapis_lazuli"
       }
     }
   ],
+  "processing_time": 40,
   "tool_item": {
     "item": "minecraft:brush"
   },
