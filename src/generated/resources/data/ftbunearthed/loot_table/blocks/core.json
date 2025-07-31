@@ -11,11 +11,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "ftbunearthed:unearther"
+          "name": "ftbunearthed:core"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "ftbunearthed:blocks/unearther"
+  "random_sequence": "ftbunearthed:blocks/core"
 }

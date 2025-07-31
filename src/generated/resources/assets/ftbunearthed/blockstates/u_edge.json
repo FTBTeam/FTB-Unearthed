@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "ftbunearthed:block/u_edge",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "ftbunearthed:block/u_edge"
+    },
+    "facing=south": {
+      "model": "ftbunearthed:block/u_edge",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "ftbunearthed:block/u_edge",
+      "y": 270
+    }
+  }
+}

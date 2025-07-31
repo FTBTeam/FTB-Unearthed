@@ -8,6 +8,8 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -17,9 +19,11 @@ public class UneartherMenu extends AbstractContainerMenu {
     public static final int PLAYER_INV_Y = 84;
 
     private final UneartherCoreBlockEntity unearther;
+    private final ContainerData data;
 
-    public UneartherMenu(int containerId, Inventory invPlayer, BlockPos pos) {
+    public UneartherMenu(int containerId, Inventory invPlayer, BlockPos pos, ContainerData data) {
         super(ModMenuTypes.UNEARTHER_MENU.get(), containerId);
+        this.data = data;
 
         unearther = invPlayer.player.level().getBlockEntity(pos, ModBlockEntityTypes.UNEARTHER_CORE.get())
                 .orElseThrow(() -> new IllegalStateException("unearther block entity missing at " + pos));
@@ -36,22 +40,23 @@ public class UneartherMenu extends AbstractContainerMenu {
             addSlot(new Slot(invPlayer, x, 8 + x * 18, PLAYER_INV_Y + 58));
         }
 
-        // worker item slot
-        addSlot(new SlotItemHandler(unearther.getWorkerItemHandler(), 0, 14, 35));
-        // tool slot
-        addSlot(new SlotItemHandler(unearther.getToolItemHandler(), 0, 37, 35));
+        // item slots
+        addSlot(new SlotItemHandler(unearther.getInputHandler(), 0, 62, 18));
+        addSlot(new SlotItemHandler(unearther.getFoodHandler(), 0, 26, 18));
+        addSlot(new SlotItemHandler(unearther.getWorkerHandler(), 0, 26, 53));
+        addSlot(new SlotItemHandler(unearther.getToolHandler(), 0, 62, 53));
 
         // item output slots
         for (int i = 0; i < 6; i++) {
-            addSlot(new OutputOnlySlot(unearther.getInternalOutputHandler(), i, 98 + 18 * (i % 3), 26 + 18 * (i / 3)));
+            addSlot(new OutputOnlySlot(unearther.getOutputHandler(), i, 116 + 18 * (i % 2), 17 + 18 * (i / 2)));
         }
 
-        addDataSlot(unearther.getProgressSlot());
-        addDataSlot(unearther.getProcessingTimeSlot());
+        // sync'd data
+        addDataSlots(data);
     }
 
     public static UneartherMenu fromNetwork(int windowId, Inventory inventory, RegistryFriendlyByteBuf buf) {
-        UneartherMenu menu = new UneartherMenu(windowId, inventory, buf.readBlockPos());
+        UneartherMenu menu = new UneartherMenu(windowId, inventory, buf.readBlockPos(), new SimpleContainerData(4));
         // TODO anything else to sync?
         return menu;
     }
@@ -65,7 +70,7 @@ public class UneartherMenu extends AbstractContainerMenu {
             resultStack = stackInSlot.copy();
             if (index < 36) {
                 // moving from player inv to machine slots
-                if (!moveItemStackTo(stackInSlot, 36, 38, false)) {
+                if (!moveItemStackTo(stackInSlot, 36, 40, false)) {
                     return ItemStack.EMPTY;
                 }
             } else if (!moveItemStackTo(stackInSlot, 27, 36, false)
@@ -94,8 +99,16 @@ public class UneartherMenu extends AbstractContainerMenu {
 
     public float getProgress() {
         // called client-side
-        int max = unearther.getProcessingTimeSlot().get();
-        int current = unearther.getProgressSlot().get();
-        return max == 0 || current <= 0 ? 0f : 1f - (float) current / max;
+        int processingTime = data.get(0);
+        int progress = data.get(1);
+        return processingTime == 0 || progress <= 0 ? 0f : 1f - (float) progress / processingTime;
+    }
+
+    public float getFoodBuffer() {
+        return (float) data.get(2) / UneartherCoreBlockEntity.MAX_FOOD_BUFFER;
+    }
+
+    public int getSpeedBoost() {
+        return data.get(3);
     }
 }

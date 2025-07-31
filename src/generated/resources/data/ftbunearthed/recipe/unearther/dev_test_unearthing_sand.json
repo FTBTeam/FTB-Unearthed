@@ -5,7 +5,8 @@
     }
   ],
   "type": "ftbunearthed:unearther",
-  "outputs": [
+  "input_block": "minecraft:sand",
+  "output_items": [
     {
       "chance": 0.1,
       "item": {
@@ -37,7 +38,7 @@
   ],
   "processing_time": 40,
   "tool_item": {
-    "item": "minecraft:brush"
+    "tag": "c:tools/brush"
   },
   "worker_item": {
     "item": "minecraft:name_tag"

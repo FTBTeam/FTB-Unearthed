@@ -1,0 +1,12 @@
+{
+  "values": [
+    "ftbunearthed:core",
+    "ftbunearthed:l_edge",
+    "ftbunearthed:m_edge",
+    "ftbunearthed:u_edge",
+    "ftbunearthed:l_corner",
+    "ftbunearthed:u_corner",
+    "ftbunearthed:m_face",
+    "ftbunearthed:u_face"
+  ]
+}

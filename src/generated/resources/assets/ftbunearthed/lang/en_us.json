@@ -1,3 +1,12 @@
 {
-  "block.ftbunearthed.unearther": "Unearther"
+  "block.ftbunearthed.core": "Unearther",
+  "block.ftbunearthed.l_corner": "Unearther",
+  "block.ftbunearthed.l_edge": "Unearther",
+  "block.ftbunearthed.m_edge": "Unearther",
+  "block.ftbunearthed.m_face": "Unearther",
+  "block.ftbunearthed.u_corner": "Unearther",
+  "block.ftbunearthed.u_edge": "Unearther",
+  "block.ftbunearthed.u_face": "Unearther",
+  "ftbunearthed.gui.speed_boost": "Speed Boost: %s%%",
+  "item.ftbunearthed.reinforced_brush": "Reinforced Brush"
 }

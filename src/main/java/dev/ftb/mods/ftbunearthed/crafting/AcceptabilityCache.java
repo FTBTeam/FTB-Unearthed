@@ -3,7 +3,7 @@ package dev.ftb.mods.ftbunearthed.crafting;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 public class AcceptabilityCache<T> {
     public enum Acceptability {
@@ -28,10 +28,10 @@ public class AcceptabilityCache<T> {
         theCache.clear();
     }
 
-    public boolean isAcceptable(T itemToTest, Supplier<Boolean> tester) {
+    public boolean isAcceptable(T itemToTest, BooleanSupplier tester) {
         Acceptability a = theCache.getOrDefault(itemToTest, Acceptability.UNKNOWN);
         if (a != Acceptability.UNKNOWN) return a.result;
-        boolean result = tester.get();
+        boolean result = tester.getAsBoolean();
         theCache.put(itemToTest, Acceptability.of(result));
         return result;
     }

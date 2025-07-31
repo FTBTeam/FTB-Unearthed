@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "ftbunearthed:block/l_corner",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "ftbunearthed:block/l_corner"
+    },
+    "facing=south": {
+      "model": "ftbunearthed:block/l_corner",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "ftbunearthed:block/l_corner",
+      "y": 270
+    }
+  }
+}

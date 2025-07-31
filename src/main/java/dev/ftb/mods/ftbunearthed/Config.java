@@ -2,10 +2,6 @@ package dev.ftb.mods.ftbunearthed;
 
 import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.event.config.ModConfigEvent;
-import net.neoforged.neoforge.common.ModConfigSpec;
 
 public interface Config {
     SNBTConfig CONFIG = SNBTConfig.create(FTBUnearthed.MODID);

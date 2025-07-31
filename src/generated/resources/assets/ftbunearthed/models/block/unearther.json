@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/orientable",
-  "textures": {
-    "front": "ftbunearthed:block/unearther_front",
-    "side": "ftbunearthed:block/unearther_side",
-    "top": "ftbunearthed:block/unearther_top"
-  }
-}

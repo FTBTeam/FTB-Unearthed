@@ -1,0 +1,47 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "ftbunearthed:dev_environment"
+    }
+  ],
+  "type": "ftbunearthed:unearther",
+  "damage_chance": 0.25,
+  "input_block": "minecraft:gravel",
+  "output_items": [
+    {
+      "chance": 0.6,
+      "item": {
+        "count": 2,
+        "id": "minecraft:raw_iron"
+      }
+    },
+    {
+      "chance": 0.3,
+      "item": {
+        "count": 1,
+        "id": "minecraft:raw_copper"
+      }
+    },
+    {
+      "chance": 0.1,
+      "item": {
+        "count": 1,
+        "id": "minecraft:raw_gold"
+      }
+    },
+    {
+      "chance": 0.1,
+      "item": {
+        "count": 1,
+        "id": "minecraft:redstone"
+      }
+    }
+  ],
+  "processing_time": 60,
+  "tool_item": {
+    "tag": "c:tools/brush"
+  },
+  "worker_item": {
+    "item": "minecraft:name_tag"
+  }
+}

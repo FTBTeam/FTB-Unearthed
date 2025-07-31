@@ -21,7 +21,7 @@ public class DataGenerators {
 
         generator.addProvider(event.includeClient(), new LangGenerator(packOutput));
         generator.addProvider(event.includeClient(), new BlockStatesGenerator(packOutput, existingFileHelper));
-//        generator.addProvider(event.includeClient(), new ItemModelsGenerator(packOutput, existingFileHelper));
+        generator.addProvider(event.includeClient(), new ItemModelsGenerator(packOutput, existingFileHelper));
 
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 

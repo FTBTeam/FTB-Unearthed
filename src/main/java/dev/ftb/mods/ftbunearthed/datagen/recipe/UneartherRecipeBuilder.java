@@ -7,20 +7,20 @@ import net.minecraft.world.item.crafting.Ingredient;
 import java.util.List;
 
 public class UneartherRecipeBuilder extends BaseRecipeBuilder<UneartherRecipe> {
+    private final String inputStateStr;
     private final Ingredient workerItem;
     private final Ingredient toolItem;
-    private int processingTime;
     private final List<ItemWithChance> outputs;
+    private int processingTime;
+    private float damageChance;
 
-    public UneartherRecipeBuilder(Ingredient workerItem, Ingredient toolItem, int processingTime, List<ItemWithChance> outputs) {
+    public UneartherRecipeBuilder(String inputStateStr, Ingredient workerItem, Ingredient toolItem, List<ItemWithChance> outputs) {
+        this.inputStateStr = inputStateStr;
         this.workerItem = workerItem;
         this.toolItem = toolItem;
-        this.processingTime = processingTime;
         this.outputs = outputs;
-    }
-
-    public UneartherRecipeBuilder(Ingredient workerItem, Ingredient toolItem, List<ItemWithChance> outputs) {
-        this(workerItem, toolItem, 200, outputs);
+        this.processingTime = 200;
+        this.damageChance = 0.1f;
     }
 
     public UneartherRecipeBuilder withProcessingTime(int time) {
@@ -28,8 +28,13 @@ public class UneartherRecipeBuilder extends BaseRecipeBuilder<UneartherRecipe> {
         return this;
     }
 
+    public UneartherRecipeBuilder withToolDamageChance(float damageChance) {
+        this.damageChance = damageChance;
+        return this;
+    }
+
     @Override
     protected UneartherRecipe buildRecipe() {
-        return new UneartherRecipe(workerItem, toolItem, processingTime, outputs);
+        return new UneartherRecipe(inputStateStr, workerItem, toolItem, processingTime, outputs, damageChance);
     }
 }

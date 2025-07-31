@@ -5,9 +5,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.data.loot.LootTableProvider;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 
@@ -29,12 +27,12 @@ public class LootTablesGenerator extends LootTableProvider {
 
         @Override
         protected Iterable<Block> getKnownBlocks() {
-            return List.of(ModBlocks.UNEARTHER.get());
+            return List.of(ModBlocks.CORE.get());
         }
 
         @Override
         protected void generate() {
-            dropSelf(ModBlocks.UNEARTHER.get());
+            dropSelf(ModBlocks.CORE.get());
         }
     }
 }
