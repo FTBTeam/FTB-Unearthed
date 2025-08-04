@@ -6,6 +6,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -146,10 +147,10 @@ public class UneartherCoreBlock extends Block implements EntityBlock {
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
         return (level1, blockPos, blockState, t) -> {
             if (t instanceof UneartherCoreBlockEntity tickable) {
-                if (level1.isClientSide()) {
-                    tickable.tickClient();
+                if (level1 instanceof ServerLevel serverLevel) {
+                    tickable.tickServer(serverLevel);
                 } else {
-                    tickable.tickServer();
+                    tickable.tickClient(level1);
                 }
             }
         };

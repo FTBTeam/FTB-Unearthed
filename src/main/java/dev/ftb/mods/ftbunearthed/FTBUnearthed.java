@@ -6,6 +6,8 @@ import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import dev.ftb.mods.ftbunearthed.block.UneartherCoreBlockEntity;
 import dev.ftb.mods.ftbunearthed.block.UneartherFrameBlockEntity;
 import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
+import dev.ftb.mods.ftbunearthed.entity.Worker;
+import dev.ftb.mods.ftbunearthed.network.NetworkHandler;
 import dev.ftb.mods.ftbunearthed.registry.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -20,6 +22,7 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
@@ -37,8 +40,9 @@ public class FTBUnearthed {
 
         modEventBus.addListener(this::addCreative);
         modEventBus.addListener(this::registerCapabilities);
+        modEventBus.addListener(this::registerEntityAttributes);
+        modEventBus.addListener(NetworkHandler::register);
 
-//        NeoForge.EVENT_BUS.addListener(this::onItemUse);
         NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
 
         ConfigManager.getInstance().registerServerConfig(Config.CONFIG, MODID + ".settings",
@@ -52,6 +56,7 @@ public class FTBUnearthed {
     private void registerAll(IEventBus modEventBus) {
         ModBlocks.BLOCKS.register(modEventBus);
         ModBlockEntityTypes.BLOCK_ENTITY_TYPES.register(modEventBus);
+        ModEntityTypes.ENTITY_TYPES.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
         ModMenuTypes.MENU_TYPES.register(modEventBus);
         ModRecipes.RECIPE_SERIALIZERS.register(modEventBus);
@@ -79,17 +84,9 @@ public class FTBUnearthed {
         event.addListener(new CacheReloadListener());
     }
 
-//    private void onItemUse(PlayerInteractEvent.RightClickItem event) {
-//        if (event.getHand() == InteractionHand.MAIN_HAND && !event.getLevel().isClientSide) {
-//            ItemStack main = event.getEntity().getMainHandItem();
-//            ItemStack off = event.getEntity().getOffhandItem();
-//            if (UneartherCoreBlockEntity.isKnownToolItem(event.getLevel(), main) && UneartherCoreBlockEntity.isKnownWorkerItem(event.getLevel(), off)) {
-//                FTBUnearthed.LOGGER.info("rightclicking! {}", event.getLevel().getGameTime());
-//                event.getEntity().swing(InteractionHand.MAIN_HAND, true);
-//                event.getLevel().playSound(null, event.getEntity().blockPosition(), SoundEvents.BRUSH_GRAVEL, SoundSource.PLAYERS, 1f, 1f);
-//            }
-//        }
-//    }
+    private void registerEntityAttributes(EntityAttributeCreationEvent event) {
+        event.put(ModEntityTypes.WORKER.get(), Worker.createAttributes().build());
+    }
 
     public static class CacheReloadListener implements PreparableReloadListener {
         @Override
