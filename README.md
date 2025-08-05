@@ -91,6 +91,19 @@ An example recipe:
   * A chance of 1.0 indicates the output is always produced
   * A chance of >1.0 indicates that extra output may be produced (e.g. 1.5 means produce one item, and a 50% chance of a second item)
 
+### KubeJS support
+
+The mod registers a KubeJS schema to allow for easy recipe creation via KubeJS.  Example:
+
+```javascript
+ServerEvents.recipes(event => {
+  const ftbunearthed = event.recipes.ftbunearthed;
+  
+  // red sand -> 1 lapis, using an armorer worker token (any village type & level), and any brush as a tool
+  ftbunearthed.unearther([ { "item": "lapis_lazuli", "chance": 1.0 } ], "minecraft:red_sand", { "profession": "armorer" }, "#c:tools/brush")
+})
+```
+
 ## Worker Tokens
 Any inserted worker token item also has villager data in the same form as the `worker` field above, encoded in the `ftbunearthed:worker_data` item data component.
 
