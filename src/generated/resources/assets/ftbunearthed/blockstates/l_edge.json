@@ -2,17 +2,21 @@
   "variants": {
     "facing=east": {
       "model": "ftbunearthed:block/l_edge",
+      "uvlock": true,
       "y": 90
     },
     "facing=north": {
-      "model": "ftbunearthed:block/l_edge"
+      "model": "ftbunearthed:block/l_edge",
+      "uvlock": true
     },
     "facing=south": {
       "model": "ftbunearthed:block/l_edge",
+      "uvlock": true,
       "y": 180
     },
     "facing=west": {
       "model": "ftbunearthed:block/l_edge",
+      "uvlock": true,
       "y": 270
     }
   }

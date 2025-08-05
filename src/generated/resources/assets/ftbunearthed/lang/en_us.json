@@ -7,6 +7,14 @@
   "block.ftbunearthed.u_corner": "Unearther",
   "block.ftbunearthed.u_edge": "Unearther",
   "block.ftbunearthed.u_face": "Unearther",
+  "ftbunearthed.gui.food_remaining": "Remaining: %s",
   "ftbunearthed.gui.speed_boost": "Speed Boost: %s%%",
-  "item.ftbunearthed.reinforced_brush": "Reinforced Brush"
+  "ftbunearthed.tooltip.worker_level": "Level: %s",
+  "ftbunearthed.tooltip.worker_profession": "Profession: %s",
+  "ftbunearthed.tooltip.worker_require_level": "Required Level: >= %s",
+  "ftbunearthed.tooltip.worker_require_profession": "Required Profession: %s",
+  "ftbunearthed.tooltip.worker_require_type": "Required Village Type: %s",
+  "ftbunearthed.tooltip.worker_type": "Village Type: %s",
+  "item.ftbunearthed.reinforced_brush": "Reinforced Brush",
+  "item.ftbunearthed.worker_token": "Worker Token"
 }

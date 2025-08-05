@@ -33,6 +33,7 @@ public class BlockStatesGenerator extends BlockStateProvider {
     private void rotatableBlock(DeferredBlock<? extends Block> block) {
         var model = models().getExistingFile(modLoc("block/" + block.getId().getPath()));
         getVariantBuilder(block.get()).forAllStates(state -> ConfiguredModel.builder()
+                .uvLock(block.getId().getPath().startsWith("l_"))
                 .modelFile(model)
                 .rotationY(((int) state.getValue(BlockStateProperties.HORIZONTAL_FACING).toYRot() + 180) % 360).build());
     }

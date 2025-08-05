@@ -1,12 +1,15 @@
 package dev.ftb.mods.ftbunearthed.block;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbunearthed.crafting.AcceptabilityCache;
 import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
 import dev.ftb.mods.ftbunearthed.crafting.recipe.UneartherRecipe;
 import dev.ftb.mods.ftbunearthed.entity.Worker;
+import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.menu.UneartherMenu;
-import dev.ftb.mods.ftbunearthed.network.UneartherStatusMessage;
 import dev.ftb.mods.ftbunearthed.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
 import dev.ftb.mods.ftbunearthed.registry.ModEntityTypes;
 import dev.ftb.mods.ftbunearthed.registry.ModRecipes;
 import net.minecraft.Util;
@@ -16,7 +19,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -24,19 +32,19 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -45,10 +53,10 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.items.wrapper.ForwardingItemHandler;
-import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -78,7 +86,6 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     private final IItemHandler outputWrapper = new OutputWrapper(outputHandler);
 
     private static final AcceptabilityCache<Item> knownInputItems = new AcceptabilityCache<>();
-    private static final AcceptabilityCache<Item> knownWorkerItems = new AcceptabilityCache<>();
     private static final AcceptabilityCache<Item> knownToolItems = new AcceptabilityCache<>();
 
     private UneartherRecipe currentRecipe = null;
@@ -93,8 +100,11 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     private int foodBuffer;
     private int currentSpeedBoost = 0;
 
-    private UneartherStatusMessage.ClientStatus clientStatus = UneartherStatusMessage.ClientStatus.IDLE;
+//    private UneartherStatusMessage.ClientStatus clientStatus = UneartherStatusMessage.ClientStatus.IDLE;
     private int clientProgress;
+    private SyncedStatus syncedStatus = SyncedStatus.EMPTY;
+    private SyncedStatus lastSynced = null;
+    private boolean syncNeeded;
 
     public UneartherCoreBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(ModBlockEntityTypes.UNEARTHER_CORE.get(), blockPos, blockState);
@@ -128,9 +138,40 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     }
 
     public static void clearKnownItemCaches() {
-        knownWorkerItems.clear();
         knownToolItems.clear();
         knownInputItems.clear();
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider provider) {
+        // server side, chunk sending
+        CompoundTag compound = super.getUpdateTag(provider);
+        lastSynced = SyncedStatus.create(this);
+        compound.put("Status", SyncedStatus.CODEC.encodeStart(provider.createSerializationContext(NbtOps.INSTANCE), lastSynced).getOrThrow());
+        return compound;
+    }
+
+    @Override
+    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
+        // server side, block update (calls getUpdateTag())
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider provider) {
+        // client side, chunk sending
+        processClientSync(tag, provider);
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
+        // client side, block update
+        processClientSync(pkt.getTag(), lookupProvider);
+    }
+
+    private void processClientSync(CompoundTag tag, HolderLookup.Provider provider) {
+        syncedStatus = SyncedStatus.CODEC.parse(provider.createSerializationContext(NbtOps.INSTANCE), tag.getCompound("Status")).getOrThrow();
+        clientProgress = 0;
     }
 
     private @NotNull ItemStack getToolStack() {
@@ -147,8 +188,11 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     }
 
     public void tickClient(Level level) {
-        if (clientStatus.active()) {
-            clientProgress = (clientProgress + 1) % clientStatus.processingTime();
+        if (syncedStatus.active()) {
+            if (clientProgress == 0) {
+                level.playLocalSound(getBlockPos().above(), SoundEvents.BRUSH_GENERIC, SoundSource.BLOCKS, 0.6f, 1f, false);
+            }
+            clientProgress = (clientProgress + 1) % syncedStatus.processingTime();
             if (level.random.nextInt(8) == 0) {
                 Direction d = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
                 Vec3 vec = Vec3.atBottomCenterOf(getBlockPos()).add(d.getStepX() * 0.5, 1.5, d.getStepZ() * 0.5);
@@ -182,15 +226,18 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         } else if (currentRecipe != null) {
             runOneWorkCycle(level);
         } else {
-            if (progress != IDLING) {
-                syncStatusToClients();
-            }
             progress = IDLING;
         }
 
         if (progress != prevProgress) {
             syncedProgress = progress / PROGRESS_MULT;
             setChanged();
+            syncNeeded = true;
+        }
+
+        if (syncNeeded) {
+            syncStatusToClients();
+            syncNeeded = false;
         }
     }
 
@@ -200,10 +247,14 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         Direction d = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
         if (!getWorkerStack().isEmpty() && currentWorker == null) {
             // (re)spawn worker entity
+            WorkerToken.WorkerData data = getWorkerStack().get(ModDataComponents.WORKER_DATA);
+            if (data == null) {
+                return;  // shouldn't happen!
+            }
 
             // TODO get entity from component data on worker item
             Worker newWorker = new Worker(ModEntityTypes.WORKER.get(), level);
-            newWorker.setVillagerData(newWorker.getVillagerData().setProfession(VillagerProfession.MASON));
+            newWorker.setVillagerData(data.getVillagerData());
             newWorker.setNoAi(true);
             newWorker.setPos(Vec3.atCenterOf(getBlockPos()).add(d.getStepX() * -0.5, 0.0, d.getStepZ() * -0.5));
             newWorker.setYHeadRot(d.toYRot());
@@ -225,7 +276,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
             w.setItemInHand(InteractionHand.MAIN_HAND, getToolStack().copy());
             w.setYHeadRot(d.toYRot());
             Direction dir = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
-            if (!getInputStack().isEmpty() && !getToolStack().isEmpty()) {
+            if (currentRecipe != null) {
                 w.lookAt(EntityAnchorArgument.Anchor.EYES, Vec3.atCenterOf(getBlockPos()).add(dir.getStepX(), 1, dir.getStepZ()));
                 w.setBusy(true);
             } else {
@@ -242,17 +293,15 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
 
     private void processFoodSlot(ServerLevel level) {
         ItemStack food = foodHandler.getStackInSlot(0);
-        if (!food.isEmpty()) {
+        if (!food.isEmpty() && !getWorkerStack().isEmpty() && foodBuffer == 0) {
             FoodProperties props = food.getFoodProperties(null);
             if (props != null) {
-                int value = (int) (props.saturation() * 1200);  // one saturation = 1200 ticks or 1 minute
-                if (MAX_FOOD_BUFFER - foodBuffer > value) {
-                    foodHandler.extractItem(0, 1, false);
-                    foodBuffer += value;
-                    currentSpeedBoost = props.nutrition() * 5;
-                    level.playSound(null, getBlockPos().above(2), SoundEvents.GENERIC_EAT, SoundSource.BLOCKS, 1f, 1f);
-                    setChanged();
-                }
+                int value = Math.min(MAX_FOOD_BUFFER, (int) (props.saturation() * 1200));  // one saturation = 1200 ticks or 1 minute
+                foodHandler.extractItem(0, 1, false);
+                foodBuffer += value;
+                currentSpeedBoost = props.nutrition() * 5;
+                level.playSound(null, getBlockPos().above(2), SoundEvents.GENERIC_EAT, SoundSource.BLOCKS, 1f, 1f);
+                setChanged();
             }
         }
     }
@@ -262,10 +311,6 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
 
         if (progress < 0 || progress > internalProcessingTime) {
             progress = internalProcessingTime;
-        }
-
-        if (progress == internalProcessingTime) {
-            syncStatusToClients();
         }
 
         int step = PROGRESS_MULT;
@@ -278,7 +323,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
             if (progress == 0) {
                 // work cycle complete
                 ItemStack taken = inputHandler.extractItem(0, 1, true);
-                if (taken.isEmpty() || !tryGenerateOutputs()) {
+                if (taken.isEmpty() || !tryGenerateOutputs(level)) {
                     cooldownTimer = COOLDOWN;
                 }
                 inputHandler.extractItem(0, 1, false);
@@ -293,6 +338,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
 
     private Optional<RecipeHolder<UneartherRecipe>> searchForRecipe() {
         return level.getRecipeManager().getAllRecipesFor(ModRecipes.UNEARTHER_TYPE.get()).stream()
+                .sorted((o1, o2) -> o2.value().compareTo(o1.value()))  // recipes with the highest worker level have priority
                 .filter(holder -> holder.value().test(getInputStack(), getWorkerStack(), getToolStack()))
                 .findFirst();
     }
@@ -305,11 +351,14 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         );
     }
 
-    private boolean tryGenerateOutputs() {
+    private boolean tryGenerateOutputs(ServerLevel level) {
         assert currentRecipe != null;
 
+        List<ItemStack> outputs = currentRecipe.generateOutputs(level.random);
+        if (outputs.isEmpty()) return true;
+
         boolean ok = false;
-        for (ItemStack output: currentRecipe.generateOutputs(level.random)) {
+        for (ItemStack output: outputs) {
             ItemStack result = ItemHandlerHelper.insertItemStacked(outputHandler, output, false);
             // if nothing at all can be inserted, go into cooldown
             if (!ItemStack.matches(output, result)) {
@@ -355,6 +404,10 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         }
     }
 
+    public int getCurrentSpeedBoost() {
+        return currentSpeedBoost;
+    }
+
     public IItemHandler getWorkerHandler() {
         return workerHandler;
     }
@@ -384,12 +437,6 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
             case DOWN -> outputWrapper;
             default -> inputWrapper;
         };
-    }
-
-    public static boolean isKnownWorkerItem(Level level, ItemStack stack) {
-        return knownWorkerItems.isAcceptable(stack.getItem(), () ->
-                level.getRecipeManager().getAllRecipesFor(ModRecipes.UNEARTHER_TYPE.get()).stream()
-                        .anyMatch(h -> h.value().getWorkerItem().test(stack)));
     }
 
     public static boolean isKnownToolItem(Level level, ItemStack stack) {
@@ -441,18 +488,19 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         return new UneartherMenu(containerId, playerInventory, getBlockPos(), dataAccess);
     }
 
-    public void syncStatusFromServer(UneartherStatusMessage.ClientStatus status) {
-        this.clientStatus = status;
-        clientProgress = 0;
+    public void syncStatusToClients() {
+        if (level instanceof ServerLevel serverLevel && !lastSynced.equals(SyncedStatus.create(this))) {
+            serverLevel.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
+        }
     }
 
-    public UneartherStatusMessage.ClientStatus getClientStatus() {
-        return clientStatus;
+    public SyncedStatus getSyncedStatus() {
+        return syncedStatus;
     }
 
     public int getClientBreakProgress() {
-        if (clientStatus.active()) {
-            float pct = Mth.clamp((float) clientProgress / clientStatus.processingTime(), 0f, 1f);
+        if (syncedStatus.active()) {
+            float pct = Mth.clamp((float) clientProgress / syncedStatus.processingTime(), 0f, 1f);
             return (int) (9 * pct);
         }
         return 0;
@@ -460,12 +508,6 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
 
     public Optional<UneartherRecipe> getCurrentRecipe() {
         return Optional.ofNullable(currentRecipe);
-    }
-
-    public void syncStatusToClients() {
-        if (level instanceof ServerLevel serverLevel) {
-            PacketDistributor.sendToPlayersTrackingChunk(serverLevel, new ChunkPos(getBlockPos()), UneartherStatusMessage.create(this));
-        }
     }
 
     public static class InputWrapper extends ForwardingItemHandler {
@@ -523,7 +565,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
 
             if (getStackInSlot(slot).getItem() != lastItem) {
                 lastItem = getStackInSlot(slot).getItem();
-                syncStatusToClients();
+                syncNeeded = true;
             }
         }
     }
@@ -536,13 +578,32 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
 
     private class WorkerHandler extends FilteredHandler {
         public WorkerHandler() {
-            super(stack -> UneartherCoreBlockEntity.isKnownWorkerItem(level, stack));
+            super(stack -> stack.get(ModDataComponents.WORKER_DATA) != null);
         }
     }
 
     private class ToolHandler extends FilteredHandler {
         public ToolHandler() {
             super(stack -> UneartherCoreBlockEntity.isKnownToolItem(level, stack));
+        }
+    }
+
+    public record SyncedStatus(BlockState blockState, int processingTime) {
+        static final Codec<SyncedStatus> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+                BlockState.CODEC.fieldOf("block").forGetter(SyncedStatus::blockState),
+                Codec.INT.fieldOf("time").forGetter(SyncedStatus::processingTime)
+        ).apply(builder, SyncedStatus::new));
+        static final SyncedStatus EMPTY = new SyncedStatus(Blocks.AIR.defaultBlockState(), 0);
+
+        static SyncedStatus create(UneartherCoreBlockEntity core) {
+            int processingTime = core.getCurrentRecipe().map(UneartherRecipe::getProcessingTime).orElse(0);
+            int boost = core.getCurrentSpeedBoost();
+            BlockState state = core.getInputStack().getItem() instanceof BlockItem bi ? bi.getBlock().defaultBlockState() : Blocks.AIR.defaultBlockState();
+            return new SyncedStatus(state, processingTime * 100 / (100 + boost));
+        }
+
+        public boolean active() {
+            return processingTime > 0;
         }
     }
 }

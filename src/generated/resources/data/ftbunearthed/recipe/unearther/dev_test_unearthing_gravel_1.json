@@ -41,7 +41,7 @@
   "tool_item": {
     "tag": "c:tools/brush"
   },
-  "worker_item": {
-    "item": "minecraft:name_tag"
+  "worker": {
+    "profession": "minecraft:mason"
   }
 }

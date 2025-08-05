@@ -5,42 +5,36 @@
     }
   ],
   "type": "ftbunearthed:unearther",
-  "input_block": "minecraft:sand",
+  "input_block": "minecraft:snow_block",
   "output_items": [
+    {
+      "chance": 0.2,
+      "item": {
+        "count": 2,
+        "id": "minecraft:snowball"
+      }
+    },
     {
       "chance": 0.1,
       "item": {
-        "count": 2,
-        "id": "minecraft:diamond"
+        "count": 1,
+        "id": "minecraft:blue_ice"
       }
     },
     {
-      "chance": 0.3,
+      "chance": 0.005,
       "item": {
         "count": 1,
-        "id": "minecraft:amethyst_shard"
-      }
-    },
-    {
-      "chance": 0.5,
-      "item": {
-        "count": 1,
-        "id": "minecraft:emerald"
-      }
-    },
-    {
-      "chance": 1.5,
-      "item": {
-        "count": 1,
-        "id": "minecraft:lapis_lazuli"
+        "id": "minecraft:snow_golem_spawn_egg"
       }
     }
   ],
-  "processing_time": 40,
+  "processing_time": 25,
   "tool_item": {
     "tag": "c:tools/brush"
   },
   "worker": {
-    "profession": "minecraft:mason"
+    "type": "minecraft:snow",
+    "profession": "minecraft:fisherman"
   }
 }

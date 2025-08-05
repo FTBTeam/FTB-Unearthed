@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbunearthed.datagen;
 
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
+import dev.ftb.mods.ftbunearthed.FTBUnearthedTags;
 import dev.ftb.mods.ftbunearthed.registry.ModItems;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
@@ -20,5 +21,6 @@ public class ItemTagsGenerator extends ItemTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider provider) {
         tag(Tags.Items.TOOLS_BRUSH).add(ModItems.REINFORCED_BRUSH.get());
+        tag(FTBUnearthedTags.Items.WORKER_TOKENS).add(ModItems.WORKER_TOKEN.get());
     }
 }

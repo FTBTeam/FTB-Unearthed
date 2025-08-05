@@ -2,11 +2,13 @@ package dev.ftb.mods.ftbunearthed.integration.jei;
 
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
 import dev.ftb.mods.ftbunearthed.crafting.IHideableRecipe;
+import dev.ftb.mods.ftbunearthed.registry.ModBlocks;
 import dev.ftb.mods.ftbunearthed.registry.ModRecipes;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.client.Minecraft;
@@ -37,6 +39,11 @@ public class UnearthedJeiPlugin implements IModPlugin {
     }
 
     @Override
+    public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+        registration.addRecipeCatalyst(ModBlocks.CORE.toStack(), RecipeTypes.UNEARTHER);
+    }
+
+    @Override
     public ResourceLocation getPluginUid() {
         return ID;
     }
@@ -48,8 +55,9 @@ public class UnearthedJeiPlugin implements IModPlugin {
     private <I extends RecipeInput, T extends Recipe<I>> void addRecipeType(IRecipeRegistration registration, net.minecraft.world.item.crafting.RecipeType<T> mcRecipeType, RecipeType<T> jeiRecipeType, Function<List<T>, List<T>> postProcessor) {
         List<T> recipes = Minecraft.getInstance().level.getRecipeManager().getAllRecipesFor(mcRecipeType).stream()
                 .map(RecipeHolder::value)
+                .sorted()
                 .filter(IHideableRecipe::shouldShow)
                 .toList();
-        registration.addRecipes(jeiRecipeType, postProcessor.apply(recipes));
+        registration.addRecipes(jeiRecipeType, postProcessor.apply(recipes.reversed()));
     }
 }

@@ -1,0 +1,34 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "ftbunearthed:dev_environment"
+    }
+  ],
+  "type": "ftbunearthed:unearther",
+  "damage_chance": 0.25,
+  "input_block": "minecraft:gravel",
+  "output_items": [
+    {
+      "chance": 0.2,
+      "item": {
+        "count": 1,
+        "id": "minecraft:diamond_ore"
+      }
+    },
+    {
+      "chance": 0.1,
+      "item": {
+        "count": 1,
+        "id": "minecraft:emerald_ore"
+      }
+    }
+  ],
+  "processing_time": 60,
+  "tool_item": {
+    "tag": "c:tools/brush"
+  },
+  "worker": {
+    "level": 3,
+    "profession": "minecraft:mason"
+  }
+}

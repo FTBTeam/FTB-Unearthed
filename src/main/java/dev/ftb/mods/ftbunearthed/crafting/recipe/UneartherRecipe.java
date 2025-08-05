@@ -9,6 +9,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbunearthed.crafting.ItemWithChance;
+import dev.ftb.mods.ftbunearthed.item.WorkerToken.WorkerData;
 import dev.ftb.mods.ftbunearthed.registry.ModRecipes;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.core.Holder;
@@ -26,14 +27,15 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class UneartherRecipe extends BaseRecipe<UneartherRecipe> {
-    private final Ingredient workerItem;
+public class UneartherRecipe extends BaseRecipe<UneartherRecipe> implements Comparable<UneartherRecipe> {
+    private final WorkerData workerData;
     private final Ingredient toolItem;
     private final String inputStateStr;
     private final BlockPredicateArgument.Result inputPredicate;
@@ -41,11 +43,11 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> {
     private final List<ItemWithChance> outputs;
     private final float damageChance;
 
-    public UneartherRecipe(String inputStateStr, Ingredient workerItem, Ingredient toolItem, int processingTime, List<ItemWithChance> outputs, float damageChance) {
+    public UneartherRecipe(String inputStateStr, WorkerData workerData, Ingredient toolItem, int processingTime, List<ItemWithChance> outputs, float damageChance) {
         super(ModRecipes.UNEARTHER_SERIALIZER, ModRecipes.UNEARTHER_TYPE);
 
         this.inputStateStr = inputStateStr;
-        this.workerItem = workerItem;
+        this.workerData = workerData;
         this.toolItem = toolItem;
         this.processingTime = processingTime;
         this.outputs = outputs;
@@ -90,8 +92,8 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> {
         return res;
     }
 
-    public Ingredient getWorkerItem() {
-        return workerItem;
+    public WorkerData getWorkerData() {
+        return workerData;
     }
 
     public Ingredient getToolItem() {
@@ -112,7 +114,7 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> {
 
     public boolean test(ItemStack inputStack, ItemStack workerStack, ItemStack toolStack) {
         // used by the unearther block entity
-        return isValidInput(inputStack) && workerItem.test(workerStack) && toolItem.test(toolStack);
+        return isValidInput(inputStack) && workerData.test(workerStack) && toolItem.test(toolStack);
     }
 
     public boolean testManual(ItemStack input, ItemStack mainHandItem) {
@@ -130,8 +132,13 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> {
         return stack.getItem() instanceof BlockItem bi && getInputBlocks().contains(bi.getBlock());
     }
 
+    @Override
+    public int compareTo(@NotNull UneartherRecipe o) {
+        return Integer.compare(workerData.level().orElse(1), o.workerData.level().orElse(1));
+    }
+
     public interface IFactory<T extends UneartherRecipe> {
-        T create(String inputStateStr, Ingredient workerItem, Ingredient toolItem, int processingTime, List<ItemWithChance> outputs, float damageChance);
+        T create(String inputStateStr, WorkerData workerData, Ingredient toolItem, int processingTime, List<ItemWithChance> outputs, float damageChance);
     }
 
     public static class Serializer<T extends UneartherRecipe> implements RecipeSerializer<T> {
@@ -141,7 +148,7 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> {
         public Serializer(IFactory<T> factory) {
             codec = RecordCodecBuilder.mapCodec(builder -> builder.group(
                     Codec.STRING.fieldOf("input_block").forGetter(UneartherRecipe::getInputStateStr),
-                    Ingredient.CODEC_NONEMPTY.fieldOf("worker_item").forGetter(UneartherRecipe::getWorkerItem),
+                    WorkerData.COMPONENT_CODEC.fieldOf("worker").forGetter(UneartherRecipe::getWorkerData),
                     Ingredient.CODEC_NONEMPTY.fieldOf("tool_item").forGetter(UneartherRecipe::getToolItem),
                     ExtraCodecs.POSITIVE_INT.optionalFieldOf("processing_time", 200).forGetter(UneartherRecipe::getProcessingTime),
                     ItemWithChance.CODEC.listOf().fieldOf("output_items").forGetter(UneartherRecipe::getOutputs),
@@ -150,7 +157,7 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> {
 
             streamCodec = StreamCodec.composite(
                     ByteBufCodecs.STRING_UTF8, UneartherRecipe::getInputStateStr,
-                    Ingredient.CONTENTS_STREAM_CODEC, UneartherRecipe::getWorkerItem,
+                    WorkerData.STREAM_CODEC, UneartherRecipe::getWorkerData,
                     Ingredient.CONTENTS_STREAM_CODEC, UneartherRecipe::getToolItem,
                     ByteBufCodecs.VAR_INT, UneartherRecipe::getProcessingTime,
                     ItemWithChance.STREAM_CODEC.apply(ByteBufCodecs.list()), UneartherRecipe::getOutputs,

@@ -22,7 +22,17 @@ public class LangGenerator extends LanguageProvider {
         });
 
         add(ModItems.REINFORCED_BRUSH.get(), "Reinforced Brush");
+        add(ModItems.WORKER_TOKEN.get(), "Worker Token");
 
         add(FTBUnearthed.MODID + ".gui.speed_boost", "Speed Boost: %s%%");
+        add(FTBUnearthed.MODID + ".gui.food_remaining", "Remaining: %s");
+
+        add(FTBUnearthed.MODID + ".tooltip.worker_profession", "Profession: %s");
+        add(FTBUnearthed.MODID + ".tooltip.worker_type", "Village Type: %s");
+        add(FTBUnearthed.MODID + ".tooltip.worker_level", "Level: %s");
+
+        add(FTBUnearthed.MODID + ".tooltip.worker_require_profession", "Required Profession: %s");
+        add(FTBUnearthed.MODID + ".tooltip.worker_require_type", "Required Village Type: %s");
+        add(FTBUnearthed.MODID + ".tooltip.worker_require_level", "Required Level: >= %s");
     }
 }

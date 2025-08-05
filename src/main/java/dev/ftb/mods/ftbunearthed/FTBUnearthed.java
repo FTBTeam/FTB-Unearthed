@@ -7,7 +7,7 @@ import dev.ftb.mods.ftbunearthed.block.UneartherCoreBlockEntity;
 import dev.ftb.mods.ftbunearthed.block.UneartherFrameBlockEntity;
 import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
 import dev.ftb.mods.ftbunearthed.entity.Worker;
-import dev.ftb.mods.ftbunearthed.network.NetworkHandler;
+import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.registry.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -34,6 +34,8 @@ public class FTBUnearthed {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public FTBUnearthed(IEventBus modEventBus, ModContainer modContainer) {
+        ConfigManager.getInstance().registerStartupConfig(StartupConfig.STARTUP_CONFIG, MODID + ".settings");
+
         modEventBus.addListener(this::commonSetup);
 
         registerAll(modEventBus);
@@ -41,12 +43,9 @@ public class FTBUnearthed {
         modEventBus.addListener(this::addCreative);
         modEventBus.addListener(this::registerCapabilities);
         modEventBus.addListener(this::registerEntityAttributes);
-        modEventBus.addListener(NetworkHandler::register);
 
         NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
-
-        ConfigManager.getInstance().registerServerConfig(Config.CONFIG, MODID + ".settings",
-                true, Config::onConfigChanged);
+        NeoForge.EVENT_BUS.addListener(WorkerToken::addTooltip);
     }
 
     public static ResourceLocation id(String path) {
@@ -58,6 +57,7 @@ public class FTBUnearthed {
         ModBlockEntityTypes.BLOCK_ENTITY_TYPES.register(modEventBus);
         ModEntityTypes.ENTITY_TYPES.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
+        ModDataComponents.COMPONENTS.register(modEventBus);
         ModMenuTypes.MENU_TYPES.register(modEventBus);
         ModRecipes.RECIPE_SERIALIZERS.register(modEventBus);
         ModRecipes.RECIPE_TYPES.register(modEventBus);
@@ -72,6 +72,7 @@ public class FTBUnearthed {
         if (event.getTab() == FTBLibrary.getCreativeModeTab().get()) {
             event.accept(ModBlocks.CORE.asItem());
             event.accept(ModItems.REINFORCED_BRUSH.get());
+            event.accept(ModItems.WORKER_TOKEN.get());
         }
     }
 

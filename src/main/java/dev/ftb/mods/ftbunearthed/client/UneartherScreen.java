@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbunearthed.client;
 
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
+import dev.ftb.mods.ftbunearthed.block.UneartherCoreBlockEntity;
 import dev.ftb.mods.ftbunearthed.menu.UneartherMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -8,6 +9,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+
+import java.util.List;
+import java.util.Optional;
 
 public class UneartherScreen extends AbstractContainerScreen<UneartherMenu> {
     private static final ResourceLocation TEXTURE = FTBUnearthed.id("textures/gui/unearther.png");
@@ -40,7 +44,10 @@ public class UneartherScreen extends AbstractContainerScreen<UneartherMenu> {
         super.renderTooltip(guiGraphics, x, y);
 
         if (x >= leftPos + 8 && x <= leftPos + 14 && y >= topPos + 18 && y <= topPos + 68 && menu.getFoodBuffer() > 0) {
-            guiGraphics.renderTooltip(font, Component.translatable("ftbunearthed.gui.speed_boost", + menu.getSpeedBoost()), x, y);
+            guiGraphics.renderTooltip(font, List.of(
+                    Component.translatable("ftbunearthed.gui.speed_boost", + menu.getSpeedBoost()),
+                    Component.translatable("ftbunearthed.gui.food_remaining", + (int)(menu.getFoodBuffer() * UneartherCoreBlockEntity.MAX_FOOD_BUFFER / 20))
+            ), Optional.empty(), x, y);
         }
     }
 
@@ -51,8 +58,8 @@ public class UneartherScreen extends AbstractContainerScreen<UneartherMenu> {
         int uwidth = Mth.ceil(menu.getProgress() * 24.0F);
         guiGraphics.blitSprite(BURN_PROGRESS_SPRITE, 24, 16, 0, 0, leftPos + 86, topPos + 18, uwidth, 16);
 
-        int fHeight = (int) (FOOD_BAR_HEIGHT * menu.getFoodBuffer());
-        if (fHeight > 0) {
+        if (menu.getFoodBuffer() > 0f) {
+            int fHeight = Math.max(1, (int) (FOOD_BAR_HEIGHT * menu.getFoodBuffer()));
             guiGraphics.fillGradient(
                     leftPos + 8, topPos + 18 + (FOOD_BAR_HEIGHT - fHeight),
                     leftPos + 14, topPos + 18 + FOOD_BAR_HEIGHT + 1,

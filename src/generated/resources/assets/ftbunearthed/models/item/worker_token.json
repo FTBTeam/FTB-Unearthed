@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "ftbunearthed:item/worker_token",
+    "layer1": "ftbunearthed:item/worker_layer1"
+  }
+}
