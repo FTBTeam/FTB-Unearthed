@@ -33,8 +33,8 @@ public class WorkerToken extends Item {
                 if (!data.hideTooltip) {
                     List<Component> toolTip = event.getToolTip();
                     toolTip.add(tooltipLine("worker_profession", data.getProfessionName()));
-                    toolTip.add(tooltipLine("worker_type", data.type().orElse(VillagerType.PLAINS).toString()));
-                    toolTip.add(tooltipLine("worker_level", String.valueOf(data.level().orElse(1))));
+                    toolTip.add(tooltipLine("worker_type", data.getVillagerTypeName()));
+                    toolTip.add(tooltipLine("worker_level", String.valueOf(data.getVillagerLevel())));
                 }
             });
         }
@@ -102,18 +102,26 @@ public class WorkerToken extends Item {
 
         public boolean test(ItemStack workerStack) {
             return WorkerToken.getWorkerData(workerStack).map(data -> {
-                if (!data.profession.equals(profession)) return false;
-                if (type.isPresent() && !data.type.equals(type)) return false;
-                return data.level.orElse(1) >= level.orElse(1);
+                if (!data.profession.equals(this.profession)) return false;
+                if (this.type.isPresent() && !data.type.equals(this.type)) return false;
+                return data.getVillagerLevel() >= this.getVillagerLevel();
             }).orElse(false);
         }
 
-        public VillagerData getVillagerData() {
-            return new VillagerData(type.orElse(VillagerType.PLAINS), profession, level.orElse(1));
+        public int getVillagerLevel() {
+            return level().orElse(1);
+        }
+
+        public VillagerData toVillagerData() {
+            return new VillagerData(type.orElse(VillagerType.PLAINS), profession, getVillagerLevel());
         }
 
         public MutableComponent getProfessionName() {
             return Component.translatable("entity.minecraft.villager." + profession.toString());
+        }
+
+        public MutableComponent getVillagerTypeName() {
+            return Component.translatable("ftbunearthed.villager_type." + type().orElse(VillagerType.PLAINS));
         }
     }
 }

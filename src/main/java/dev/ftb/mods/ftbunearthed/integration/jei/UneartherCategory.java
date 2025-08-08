@@ -22,8 +22,8 @@ public class UneartherCategory extends BaseUnearthedCategory<UneartherRecipe> {
     protected UneartherCategory() {
         super(RecipeTypes.UNEARTHER,
                 Component.translatable("block.ftbunearthed.core"),
-                guiHelper().drawableBuilder(bgTexture("jei_unearther.png"), 0, 0, 152, 46)
-                        .setTextureSize(152, 46)
+                guiHelper().drawableBuilder(bgTexture("jei_unearther.png"), 0, 0, 152, 64)
+                        .setTextureSize(152, 64)
                         .build(),
                 guiHelper().createDrawableItemStack(ModItems.UNEARTHER.toStack()));
     }
@@ -33,19 +33,19 @@ public class UneartherCategory extends BaseUnearthedCategory<UneartherRecipe> {
         WorkerToken.WorkerData workerData = recipe.getWorkerData();
         ItemStack worker = ModItems.WORKER_TOKEN.get().getDefaultInstance();
         worker.set(ModDataComponents.WORKER_DATA, workerData.hideTooltip(true));
-        builder.addSlot(RecipeIngredientRole.CATALYST,6, 15)
+        builder.addSlot(RecipeIngredientRole.CATALYST,6, 24)
                 .addRichTooltipCallback((recipeSlotView, tooltip) -> {
                     tooltip.add(WorkerToken.tooltipLine("worker_require_profession", workerData.getProfessionName()));
                     workerData.type().ifPresent(type -> tooltip.add(WorkerToken.tooltipLine("worker_require_type", type.toString())));
-                    String lvlStr = workerData.level().map(String::valueOf).orElse("1");
+                    String lvlStr = String.valueOf(workerData.getVillagerLevel());
                     tooltip.add(WorkerToken.tooltipLine("worker_require_level", lvlStr));
                 })
                 .addIngredient(VanillaTypes.ITEM_STACK, worker);
 
-        builder.addSlot(RecipeIngredientRole.CATALYST, 29, 15)
+        builder.addSlot(RecipeIngredientRole.CATALYST, 29, 24)
                 .addIngredients(recipe.getToolItem());
 
-        var inputBuilder = builder.addSlot(RecipeIngredientRole.INPUT, 52, 15);
+        var inputBuilder = builder.addSlot(RecipeIngredientRole.INPUT, 52, 24);
         recipe.getInputsForDisplay().forEach(input ->
                 input.ifLeft(stack -> inputBuilder.addIngredient(VanillaTypes.ITEM_STACK, stack))
                         .ifRight(fluid -> inputBuilder.addFluidStack(fluid, 1000L))
@@ -61,7 +61,7 @@ public class UneartherCategory extends BaseUnearthedCategory<UneartherRecipe> {
 
     @Override
     public void createRecipeExtras(IRecipeExtrasBuilder builder, UneartherRecipe recipe, IFocusGroup focuses) {
-        builder.addAnimatedRecipeArrow(recipe.getProcessingTime()).setPosition(70, 15);
+        builder.addAnimatedRecipeArrow(recipe.getProcessingTime()).setPosition(70, 24);
     }
 
     @Override

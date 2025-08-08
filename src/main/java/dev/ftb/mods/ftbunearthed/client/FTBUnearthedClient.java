@@ -37,7 +37,7 @@ public class FTBUnearthedClient {
         event.register((stack, tintIndex) ->
                         WorkerToken.getWorkerData(stack)
                                 .filter(data -> tintIndex == 1)
-                                .map(data -> COLORS[Math.clamp(data.level().orElse(1), 1, 5) - 1])
+                                .map(data -> COLORS[Math.clamp(data.getVillagerLevel(), 1, 5) - 1])
                                 .orElse(0xFFFFFFFF),
                 ModItems.WORKER_TOKEN.asItem()
         );

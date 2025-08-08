@@ -17,6 +17,7 @@ import net.neoforged.neoforge.items.SlotItemHandler;
 
 public class UneartherMenu extends AbstractContainerMenu {
     public static final int PLAYER_INV_Y = 84;
+    public static final int OUTPUT_SLOTS = 9;
 
     private final UneartherCoreBlockEntity unearther;
     private final ContainerData data;
@@ -47,8 +48,8 @@ public class UneartherMenu extends AbstractContainerMenu {
         addSlot(new SlotItemHandler(unearther.getToolHandler(), 0, 62, 53));
 
         // item output slots
-        for (int i = 0; i < 6; i++) {
-            addSlot(new OutputOnlySlot(unearther.getOutputHandler(), i, 116 + 18 * (i % 2), 17 + 18 * (i / 2)));
+        for (int i = 0; i < UneartherCoreBlockEntity.OUTPUT_SLOTS; i++) {
+            addSlot(new OutputOnlySlot(unearther.getOutputHandler(), i, 116 + 18 * (i % 3), 17 + 18 * (i / 3)));
         }
 
         // sync'd data

@@ -77,8 +77,8 @@ public class FTBUnearthed {
     }
 
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.UNEARTHER_CORE.get(), UneartherCoreBlockEntity::getSidedHandler);
-        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.UNEARTHER_FRAME.get(), UneartherFrameBlockEntity::getSidedHandler);
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.UNEARTHER_CORE.get(), (be, side) -> be.getItemHandler());
+        event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.UNEARTHER_FRAME.get(), (be, side) -> be.getItemHandler());
     }
 
     private void addReloadListeners(AddReloadListenerEvent event) {

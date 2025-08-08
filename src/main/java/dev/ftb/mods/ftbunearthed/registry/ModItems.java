@@ -19,7 +19,7 @@ public class ModItems {
     public static final DeferredItem<BlockItem> UNEARTHER
             = blockItem("core", ModBlocks.CORE);
     public static final DeferredItem<Item> REINFORCED_BRUSH
-            = ITEMS.register("reinforced_brush", () -> new ReinforcedBrushItem(new Item.Properties().component(DataComponents.UNBREAKABLE, new Unbreakable(false))));
+            = ITEMS.register("reinforced_brush", () -> new ReinforcedBrushItem(new Item.Properties().component(DataComponents.UNBREAKABLE, new Unbreakable(false)).stacksTo(1)));
     public static final DeferredItem<Item> WORKER_TOKEN
             = ITEMS.register("worker_token", () -> new WorkerToken(new Item.Properties()));
 

@@ -2,7 +2,6 @@ package dev.ftb.mods.ftbunearthed.block;
 
 import dev.ftb.mods.ftbunearthed.registry.ModBlockEntityTypes;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -71,7 +70,7 @@ public class UneartherFrameBlockEntity extends BlockEntity {
         }
     }
 
-    public @Nullable IItemHandler getSidedHandler(Direction side) {
-        return getCore().map(be -> be.getSidedHandler(side)).orElse(null);
+    public @Nullable IItemHandler getItemHandler() {
+        return getCore().map(UneartherCoreBlockEntity::getItemHandler).orElse(null);
     }
 }

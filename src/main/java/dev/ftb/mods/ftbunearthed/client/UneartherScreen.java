@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbunearthed.client;
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
 import dev.ftb.mods.ftbunearthed.block.UneartherCoreBlockEntity;
 import dev.ftb.mods.ftbunearthed.menu.UneartherMenu;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -43,11 +44,18 @@ public class UneartherScreen extends AbstractContainerScreen<UneartherMenu> {
     protected void renderTooltip(GuiGraphics guiGraphics, int x, int y) {
         super.renderTooltip(guiGraphics, x, y);
 
-        if (x >= leftPos + 8 && x <= leftPos + 14 && y >= topPos + 18 && y <= topPos + 68 && menu.getFoodBuffer() > 0) {
-            guiGraphics.renderTooltip(font, List.of(
-                    Component.translatable("ftbunearthed.gui.speed_boost", + menu.getSpeedBoost()),
-                    Component.translatable("ftbunearthed.gui.food_remaining", + (int)(menu.getFoodBuffer() * UneartherCoreBlockEntity.MAX_FOOD_BUFFER / 20))
-            ), Optional.empty(), x, y);
+        if (x >= leftPos + 8 && x <= leftPos + 14 && y >= topPos + 18 && y <= topPos + 68) {
+            if (menu.getFoodBuffer() > 0) {
+                guiGraphics.renderTooltip(font, List.of(
+                        Component.translatable("ftbunearthed.gui.speed_boost", +menu.getSpeedBoost()),
+                        Component.translatable("ftbunearthed.gui.food_remaining", +(int) (menu.getFoodBuffer() * UneartherCoreBlockEntity.MAX_FOOD_BUFFER / 20)).withStyle(ChatFormatting.GRAY)
+                ), Optional.empty(), x, y);
+            } else {
+                guiGraphics.renderTooltip(font, List.of(
+                        Component.translatable("ftbunearthed.gui.no_food.1"),
+                        Component.translatable("ftbunearthed.gui.no_food.2").withStyle(ChatFormatting.GRAY)
+                ), Optional.empty(), x, y);
+            }
         }
     }
 

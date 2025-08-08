@@ -52,7 +52,6 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.wrapper.ForwardingItemHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,7 +62,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvider {
-    private static final int OUTPUT_SLOTS = 6;
+    public static final int OUTPUT_SLOTS = 9;
     private static final int IDLING = -1;
     private static final int COOLDOWN = 40;  // cool-off if output is clogged
     private static final int PROGRESS_MULT = 100;  // internal multiplier, allows for speed boosting
@@ -73,17 +72,10 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     private final InputHandler inputHandler = new InputHandler();
     private final WorkerHandler workerHandler = new WorkerHandler();
     private final ToolHandler toolHandler = new ToolHandler();
-    private final ItemStackHandler outputHandler = new ItemStackHandler(OUTPUT_SLOTS) {
-        @Override
-        protected void onContentsChanged(int slot) {
-            setChanged();
-        }
-    };
+    private final ItemStackHandler outputHandler = new OutputHandler();
 
     // public capability access
-    private final IItemHandler foodWrapper = new InputWrapper(foodHandler);
-    private final IItemHandler inputWrapper = new InputWrapper(inputHandler);
-    private final IItemHandler outputWrapper = new OutputWrapper(outputHandler);
+    private final IItemHandler publicItemHandler = new PublicItemWrapper();
 
     private static final AcceptabilityCache<Item> knownInputItems = new AcceptabilityCache<>();
     private static final AcceptabilityCache<Item> knownToolItems = new AcceptabilityCache<>();
@@ -100,7 +92,6 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     private int foodBuffer;
     private int currentSpeedBoost = 0;
 
-//    private UneartherStatusMessage.ClientStatus clientStatus = UneartherStatusMessage.ClientStatus.IDLE;
     private int clientProgress;
     private SyncedStatus syncedStatus = SyncedStatus.EMPTY;
     private SyncedStatus lastSynced = null;
@@ -247,14 +238,14 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         Direction d = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
         if (!getWorkerStack().isEmpty() && currentWorker == null) {
             // (re)spawn worker entity
-            WorkerToken.WorkerData data = getWorkerStack().get(ModDataComponents.WORKER_DATA);
-            if (data == null) {
+            WorkerToken.WorkerData workerData = getWorkerStack().get(ModDataComponents.WORKER_DATA);
+            if (workerData == null) {
                 return;  // shouldn't happen!
             }
 
             // TODO get entity from component data on worker item
             Worker newWorker = new Worker(ModEntityTypes.WORKER.get(), level);
-            newWorker.setVillagerData(data.getVillagerData());
+            newWorker.setVillagerData(workerData.toVillagerData());
             newWorker.setNoAi(true);
             newWorker.setPos(Vec3.atCenterOf(getBlockPos()).add(d.getStepX() * -0.5, 0.0, d.getStepZ() * -0.5));
             newWorker.setYHeadRot(d.toYRot());
@@ -430,13 +421,8 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     }
 
     // used for capability access
-    public IItemHandler getSidedHandler(@Nullable Direction side) {
-        if (side == null) return inputWrapper;
-        return switch (side) {
-            case UP -> foodWrapper;
-            case DOWN -> outputWrapper;
-            default -> inputWrapper;
-        };
+    public IItemHandler getItemHandler() {
+        return publicItemHandler;
     }
 
     public static boolean isKnownToolItem(Level level, ItemStack stack) {
@@ -510,32 +496,58 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         return Optional.ofNullable(currentRecipe);
     }
 
-    public static class InputWrapper extends ForwardingItemHandler {
-        public InputWrapper(IItemHandler delegate) {
-            super(delegate);
+    private class PublicItemWrapper implements IItemHandler {
+        @Override
+        public int getSlots() {
+            return 2 + OUTPUT_SLOTS;
         }
 
         @Override
-        public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            return ItemStack.EMPTY;
-        }
-    }
-
-    public static class OutputWrapper extends ForwardingItemHandler {
-        public OutputWrapper(IItemHandler delegate) {
-            super(delegate);
+        public ItemStack getStackInSlot(int slot) {
+            return switch (slot) {
+                case 0 -> inputHandler.getStackInSlot(0);
+                case 1 -> foodHandler.getStackInSlot(0);
+                default -> outputHandler.getStackInSlot(slot - 2);
+            };
         }
 
         @Override
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            return stack;
+            return switch (slot) {
+                case 0 -> inputHandler.insertItem(0, stack, simulate);
+                case 1 -> foodHandler.insertItem(0, stack, simulate);
+                default -> stack;
+            };
+        }
+
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            return slot >= 2 ? outputHandler.extractItem(slot - 2, amount, simulate) : ItemStack.EMPTY;
+        }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            return switch (slot) {
+                case 0 -> inputHandler.getSlotLimit(0);
+                case 1 -> foodHandler.getSlotLimit(0);
+                default -> outputHandler.getSlotLimit(slot - 2);
+            };
+        }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            return switch (slot) {
+                case 0 -> inputHandler.isItemValid(0, stack);
+                case 1 -> foodHandler.isItemValid(0, stack);
+                default -> outputHandler.isItemValid(slot - 2, stack);
+            };
         }
     }
 
-    private abstract class FilteredHandler extends ItemStackHandler {
+    private abstract class FilteredInsertOnlyHandler extends ItemStackHandler {
         private final Predicate<ItemStack> filter;
 
-        public FilteredHandler(Predicate<ItemStack> filter) {
+        public FilteredInsertOnlyHandler(Predicate<ItemStack> filter) {
             super(1);
             this.filter = filter;
         }
@@ -552,7 +564,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         }
     }
 
-    private class InputHandler extends FilteredHandler {
+    private class InputHandler extends FilteredInsertOnlyHandler {
         private Item lastItem = Items.AIR;
 
         public InputHandler() {
@@ -570,21 +582,47 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         }
     }
 
-    private class FoodHandler extends FilteredHandler {
+    private class FoodHandler extends FilteredInsertOnlyHandler {
         public FoodHandler() {
             super(stack -> stack.getFoodProperties(null) != null);
         }
     }
 
-    private class WorkerHandler extends FilteredHandler {
+    private class WorkerHandler extends FilteredInsertOnlyHandler {
         public WorkerHandler() {
             super(stack -> stack.get(ModDataComponents.WORKER_DATA) != null);
         }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            return 1;
+        }
     }
 
-    private class ToolHandler extends FilteredHandler {
+    private class ToolHandler extends FilteredInsertOnlyHandler {
         public ToolHandler() {
             super(stack -> UneartherCoreBlockEntity.isKnownToolItem(level, stack));
+        }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            return 1;
+        }
+    }
+
+    private class OutputHandler extends ItemStackHandler {
+        public OutputHandler() {
+            super(UneartherCoreBlockEntity.OUTPUT_SLOTS);
+        }
+
+        @Override
+        protected void onContentsChanged(int slot) {
+            setChanged();
+        }
+
+        @Override
+        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+            return super.insertItem(slot, stack, simulate);
         }
     }
 

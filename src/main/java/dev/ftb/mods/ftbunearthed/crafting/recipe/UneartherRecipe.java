@@ -134,7 +134,7 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> implements Comp
 
     @Override
     public int compareTo(@NotNull UneartherRecipe o) {
-        return Integer.compare(workerData.level().orElse(1), o.workerData.level().orElse(1));
+        return Integer.compare(workerData.getVillagerLevel(), o.workerData.getVillagerLevel());
     }
 
     public interface IFactory<T extends UneartherRecipe> {
