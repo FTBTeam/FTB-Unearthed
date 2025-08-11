@@ -2,12 +2,12 @@ package dev.ftb.mods.ftbunearthed.util;
 
 import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
 import dev.ftb.mods.ftbunearthed.crafting.recipe.UneartherRecipe;
-import dev.ftb.mods.ftbunearthed.registry.ModRecipes;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
+import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -20,52 +20,61 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 public class ManualBrushing {
-    private static final Map<UUID, Object2IntMap<BlockPos>> brushProgress = new Object2ObjectOpenHashMap<>();
+    private static final Map<ResourceLocation, Object2FloatMap<BlockPos>> brushProgress = new Object2ObjectOpenHashMap<>();
 
-    public static boolean tryManualBrushing(Level level, LivingEntity livingEntity, BlockHitResult blockHitResult) {
-        if (level.isClientSide || !(livingEntity instanceof ServerPlayer player)) {
+    public static boolean tryManualBrushing(LivingEntity livingEntity, BlockHitResult blockHitResult) {
+        if (!(livingEntity instanceof ServerPlayer player)) {
             return false;
         }
 
         BlockPos pos = blockHitResult.getBlockPos();
-        ItemStack input = level.getBlockState(pos).getBlock().asItem().getDefaultInstance();
+        ItemStack input = player.level().getBlockState(pos).getBlock().asItem().getDefaultInstance();
 
         return findRecipe(player, input)
-                .map(recipe -> doBrushing(level, player, pos, recipe))
+                .map(recipe -> doBrushing(player, pos, recipe))
                 .orElse(false);
     }
 
     private static Optional<UneartherRecipe> findRecipe(ServerPlayer player, ItemStack input) {
+        int lvl = MiscUtil.getPlayerUneatherLevel(player);
+        ItemStack toolStack = player.getMainHandItem();
+
         return RecipeCaches.MANUAL_BRUSHING.getCachedRecipe(
-                        () -> player.level().getRecipeManager().getAllRecipesFor(ModRecipes.UNEARTHER_TYPE.get()).stream()
-                                .filter(holder -> holder.value().testManual(input, player.getMainHandItem()))
-                                .findFirst(),
-                        () -> Objects.hash(
-                                input,
-                                ItemStack.hashItemAndComponents(player.getMainHandItem())
-                        ))
-                .map(RecipeHolder::value);
+                () -> RecipeCaches.sortedUneartherRecipes(player.level()).stream()
+                        .filter(holder -> holder.value().testManual(input, lvl, toolStack))
+                        .findFirst(),
+                () -> Objects.hash(input, ItemStack.hashItemAndComponents(toolStack), lvl)
+        ).map(RecipeHolder::value);
     }
 
-    private static boolean doBrushing(Level level, ServerPlayer player, BlockPos pos, UneartherRecipe recipe) {
-        Object2IntMap<BlockPos> posMap = brushProgress.computeIfAbsent(player.getUUID(), k -> new Object2IntOpenHashMap<>());
-        int progress = posMap.getOrDefault(pos, 1);
-        posMap.put(pos, progress + 1);
+    private static boolean doBrushing(ServerPlayer player, BlockPos pos, UneartherRecipe recipe) {
+        Level level = player.level();
+
+        Object2FloatMap<BlockPos> progressMap = brushProgress.computeIfAbsent(level.dimension().location(), k -> new Object2FloatOpenHashMap<>());
+        float step = 1 / (recipe.getProcessingTime() / 100f);
+        float progress = progressMap.getOrDefault(pos, 0f) + step;
+        progressMap.put(pos, progress);
+
         if (progress >= 10) {
             level.destroyBlock(pos, false, player);
             recipe.generateOutputs(level.random).forEach(stack -> Block.popResource(level, pos, stack));
-            posMap.removeInt(pos);
+            progressMap.removeFloat(pos);
+            sendBreakProgress(player, pos, 0);
         } else {
-            Vec3 vec = Vec3.atCenterOf(pos);
-            for (ServerPlayer serverplayer : level.getServer().getPlayerList().getPlayers()) {
-                if (serverplayer != null && serverplayer.level() == level && serverplayer.distanceToSqr(vec) < 1024.0 * 1024.0) {
-                    serverplayer.connection.send(new ClientboundBlockDestructionPacket(player.getId(), pos, progress));
-                }
+            sendBreakProgress(player, pos, (int) progress);
+        }
+
+        return true;
+    }
+
+    private static void sendBreakProgress(ServerPlayer player, BlockPos pos, int progress) {
+        Vec3 vec = Vec3.atCenterOf(pos);
+        for (ServerPlayer serverplayer : player.getServer().getPlayerList().getPlayers()) {
+            if (serverplayer != null && serverplayer.level() == player.level() && serverplayer.distanceToSqr(vec) < 1024.0 * 1024.0) {
+                serverplayer.connection.send(new ClientboundBlockDestructionPacket(player.getId(), pos, progress));
             }
         }
-        return true;
     }
 }

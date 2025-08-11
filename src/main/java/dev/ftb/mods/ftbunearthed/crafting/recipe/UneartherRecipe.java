@@ -25,8 +25,10 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.neoforged.neoforge.common.util.Lazy;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -38,7 +40,7 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> implements Comp
     private final WorkerData workerData;
     private final Ingredient toolItem;
     private final String inputStateStr;
-    private final BlockPredicateArgument.Result inputPredicate;
+    private final Lazy<BlockPredicateArgument.Result> inputPredicate;
     private final int processingTime;
     private final List<ItemWithChance> outputs;
     private final float damageChance;
@@ -53,11 +55,14 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> implements Comp
         this.outputs = outputs;
         this.damageChance = damageChance;
 
-        try {
-            inputPredicate = BlockPredicateArgument.parse(BuiltInRegistries.BLOCK.asLookup(), new StringReader(inputStateStr));
-        } catch (CommandSyntaxException e) {
-            throw new JsonSyntaxException(e);
-        }
+        inputPredicate = Lazy.of(() -> {
+            // not ideal, but data generation chokes on block tags if they're parsed here
+            try {
+                return BlockPredicateArgument.parse(BuiltInRegistries.BLOCK.asLookup(), new StringReader(inputStateStr));
+            } catch (CommandSyntaxException e) {
+                return new BadResult();
+            }
+        });
     }
 
     public String getInputStateStr() {
@@ -65,9 +70,9 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> implements Comp
     }
 
     private Set<Block> getInputBlocks() {
-        if (inputPredicate instanceof BlockPredicateArgument.BlockPredicate b) {
+        if (inputPredicate.get() instanceof BlockPredicateArgument.BlockPredicate b) {
             return Set.of(b.state.getBlock());
-        } else if (inputPredicate instanceof BlockPredicateArgument.TagPredicate t) {
+        } else if (inputPredicate.get() instanceof BlockPredicateArgument.TagPredicate t) {
             return t.tag.stream().map(Holder::value).collect(Collectors.toSet());
         }
         return Set.of();
@@ -117,9 +122,9 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> implements Comp
         return isValidInput(inputStack) && workerData.test(workerStack) && toolItem.test(toolStack);
     }
 
-    public boolean testManual(ItemStack input, ItemStack mainHandItem) {
-        // used when brushing manually (villager token doesn't matter here)
-        return isValidInput(input) && toolItem.test(mainHandItem);
+    public boolean testManual(ItemStack inputStack, int playerUneartherLevel, ItemStack toolStack) {
+        // used when brushing manually (villager token doesn't matter, just player's unearther level)
+        return isValidInput(inputStack) && toolItem.test(toolStack) && playerUneartherLevel >= workerData.getVillagerLevel();
     }
 
     public List<ItemStack> generateOutputs(RandomSource rand) {
@@ -178,6 +183,18 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> implements Comp
         @Override
         public StreamCodec<RegistryFriendlyByteBuf, T> streamCodec() {
             return streamCodec;
+        }
+    }
+
+    private static class BadResult implements BlockPredicateArgument.Result {
+        @Override
+        public boolean test(BlockInWorld blockInWorld) {
+            return false;
+        }
+
+        @Override
+        public boolean requiresNbt() {
+            return false;
         }
     }
 }

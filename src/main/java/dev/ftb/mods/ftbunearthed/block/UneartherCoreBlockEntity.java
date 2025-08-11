@@ -328,8 +328,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     }
 
     private Optional<RecipeHolder<UneartherRecipe>> searchForRecipe() {
-        return level.getRecipeManager().getAllRecipesFor(ModRecipes.UNEARTHER_TYPE.get()).stream()
-                .sorted((o1, o2) -> o2.value().compareTo(o1.value()))  // recipes with the highest worker level have priority
+        return RecipeCaches.sortedUneartherRecipes(level).stream()
                 .filter(holder -> holder.value().test(getInputStack(), getWorkerStack(), getToolStack()))
                 .findFirst();
     }

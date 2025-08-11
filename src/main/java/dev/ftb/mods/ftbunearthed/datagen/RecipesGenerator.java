@@ -46,8 +46,12 @@ public class RecipesGenerator extends RecipeProvider {
         )).withProcessingTime(60).withToolDamageChance(0.25f).saveTest(output, FTBUnearthed.id("unearthing_gravel_1"));
 
         new UneartherRecipeBuilder("minecraft:gravel", new WorkerData(VillagerProfession.MASON, 3), Ingredient.of(Tags.Items.TOOLS_BRUSH), List.of(
-                new ItemWithChance(new ItemStack(Items.DIAMOND_ORE, 1), 0.2),
+                new ItemWithChance(new ItemStack(Items.DIAMOND_ORE, 1), 0.75),
                 new ItemWithChance(new ItemStack(Items.EMERALD_ORE, 1), 0.1)
         )).withProcessingTime(60).withToolDamageChance(0.25f).saveTest(output, FTBUnearthed.id("unearthing_gravel_3"));
+
+        new UneartherRecipeBuilder("#c:cobblestones", new WorkerData(VillagerProfession.MASON, 1), Ingredient.of(Tags.Items.TOOLS_BRUSH), List.of(
+                new ItemWithChance(new ItemStack(Items.STONE_BUTTON, 1), 1)
+        )).withProcessingTime(200).withToolDamageChance(0.5f).saveTest(output, FTBUnearthed.id("unearthing_cobblestones"));
     }
 }

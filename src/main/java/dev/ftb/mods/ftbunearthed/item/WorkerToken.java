@@ -21,6 +21,7 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class WorkerToken extends Item {
     public WorkerToken(Properties properties) {
@@ -46,8 +47,9 @@ public class WorkerToken extends Item {
     }
 
     public static Component tooltipLine(String what, String value) {
-        return Component.translatable("ftbunearthed.tooltip." + what, Component.literal(value).withStyle(ChatFormatting.AQUA))
-                .withStyle(ChatFormatting.YELLOW);
+        return tooltipLine(what, Component.literal(value));
+//        return Component.translatable("ftbunearthed.tooltip." + what, Component.literal(value).withStyle(ChatFormatting.AQUA))
+//                .withStyle(ChatFormatting.YELLOW);
     }
 
     @Override
@@ -63,7 +65,9 @@ public class WorkerToken extends Item {
     }
 
     // can't use VillagerData, sadly, because it doesn't override equals() and hashCode()
-    public record WorkerData(VillagerProfession profession, Optional<VillagerType> type, Optional<Integer> level, boolean hideTooltip) {
+    public record WorkerData(VillagerProfession profession, Optional<VillagerType> type, Optional<Integer> level, boolean hideTooltip)
+            implements Predicate<ItemStack>
+    {
         public static final Codec<WorkerData> COMPONENT_CODEC = RecordCodecBuilder.create(builder -> builder.group(
                         BuiltInRegistries.VILLAGER_PROFESSION.byNameCodec()
                                 .fieldOf("profession")
@@ -100,6 +104,7 @@ public class WorkerToken extends Item {
             return new WorkerData(profession, type, level, hide);
         }
 
+        @Override
         public boolean test(ItemStack workerStack) {
             return WorkerToken.getWorkerData(workerStack).map(data -> {
                 if (!data.profession.equals(this.profession)) return false;

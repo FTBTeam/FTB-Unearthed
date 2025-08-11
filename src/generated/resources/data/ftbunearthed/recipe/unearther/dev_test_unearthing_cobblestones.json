@@ -5,30 +5,22 @@
     }
   ],
   "type": "ftbunearthed:unearther",
-  "damage_chance": 0.25,
-  "input_block": "minecraft:gravel",
+  "damage_chance": 0.5,
+  "input_block": "#c:cobblestones",
   "output_items": [
     {
-      "chance": 0.75,
+      "chance": 1.0,
       "item": {
         "count": 1,
-        "id": "minecraft:diamond_ore"
-      }
-    },
-    {
-      "chance": 0.1,
-      "item": {
-        "count": 1,
-        "id": "minecraft:emerald_ore"
+        "id": "minecraft:stone_button"
       }
     }
   ],
-  "processing_time": 60,
   "tool_item": {
     "tag": "c:tools/brush"
   },
   "worker": {
-    "level": 3,
+    "level": 1,
     "profession": "minecraft:mason"
   }
 }

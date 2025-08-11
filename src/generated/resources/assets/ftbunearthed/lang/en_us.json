@@ -11,6 +11,7 @@
   "ftbunearthed.gui.no_food.1": "No Speed Boost!",
   "ftbunearthed.gui.no_food.2": "Insert some food in the top-left slot",
   "ftbunearthed.gui.speed_boost": "Speed Boost: %s%%",
+  "ftbunearthed.message.unearther_level": "Unearther level for player '%s': %s",
   "ftbunearthed.tooltip.worker_level": "Level: %s",
   "ftbunearthed.tooltip.worker_profession": "Profession: %s",
   "ftbunearthed.tooltip.worker_require_level": "Required Level: >= %s",

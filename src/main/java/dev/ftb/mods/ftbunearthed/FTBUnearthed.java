@@ -3,8 +3,7 @@ package dev.ftb.mods.ftbunearthed;
 import com.mojang.logging.LogUtils;
 import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
-import dev.ftb.mods.ftbunearthed.block.UneartherCoreBlockEntity;
-import dev.ftb.mods.ftbunearthed.block.UneartherFrameBlockEntity;
+import dev.ftb.mods.ftbunearthed.command.ModCommands;
 import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
 import dev.ftb.mods.ftbunearthed.entity.Worker;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
@@ -23,6 +22,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
@@ -33,7 +33,7 @@ public class FTBUnearthed {
     public static final String MODID = "ftbunearthed";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public FTBUnearthed(IEventBus modEventBus, ModContainer modContainer) {
+    public FTBUnearthed(IEventBus modEventBus) {
         ConfigManager.getInstance().registerStartupConfig(StartupConfig.STARTUP_CONFIG, MODID + ".settings");
 
         modEventBus.addListener(this::commonSetup);
@@ -44,8 +44,10 @@ public class FTBUnearthed {
         modEventBus.addListener(this::registerCapabilities);
         modEventBus.addListener(this::registerEntityAttributes);
 
+        NeoForge.EVENT_BUS.addListener(this::onPlayerDeath);
         NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
         NeoForge.EVENT_BUS.addListener(WorkerToken::addTooltip);
+        NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
     }
 
     public static ResourceLocation id(String path) {
@@ -62,6 +64,7 @@ public class FTBUnearthed {
         ModRecipes.RECIPE_SERIALIZERS.register(modEventBus);
         ModRecipes.RECIPE_TYPES.register(modEventBus);
         ModRecipes.RECIPE_CONDITIONS.register(modEventBus);
+        ModAttachmentTypes.ATTACHMENT_TYPES.register(modEventBus);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -79,6 +82,12 @@ public class FTBUnearthed {
     private void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.UNEARTHER_CORE.get(), (be, side) -> be.getItemHandler());
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.UNEARTHER_FRAME.get(), (be, side) -> be.getItemHandler());
+    }
+
+    private void onPlayerDeath(PlayerEvent.Clone event) {
+        if (event.isWasDeath() && event.getOriginal().hasData(ModAttachmentTypes.UNEARTHER_LEVEL)) {
+            event.getEntity().setData(ModAttachmentTypes.UNEARTHER_LEVEL, event.getOriginal().getData(ModAttachmentTypes.UNEARTHER_LEVEL));
+        }
     }
 
     private void addReloadListeners(AddReloadListenerEvent event) {

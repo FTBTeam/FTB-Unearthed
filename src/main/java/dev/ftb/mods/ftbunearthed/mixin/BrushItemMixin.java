@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class BrushItemMixin {
     @Inject(method = "onUseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;getBlockEntity(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/entity/BlockEntity;"), cancellable = true)
     public void onUseTick(Level level, LivingEntity livingEntity, ItemStack stack, int remainingUseDuration, CallbackInfo ci, @Local BlockHitResult blockHitResult) {
-        if (ManualBrushing.tryManualBrushing(level, livingEntity, blockHitResult)) {
+        if (ManualBrushing.tryManualBrushing(livingEntity, blockHitResult)) {
             ci.cancel();
         }
     }

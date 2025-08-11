@@ -6,7 +6,6 @@ import dev.ftb.mods.ftbunearthed.block.UneartherFrameBlock;
 import dev.ftb.mods.ftbunearthed.registry.ModBlocks;
 import dev.ftb.mods.ftbunearthed.registry.ModItems;
 import net.minecraft.data.PackOutput;
-import net.minecraft.world.entity.npc.VillagerType;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 
 public class LangGenerator extends LanguageProvider {
@@ -29,6 +28,8 @@ public class LangGenerator extends LanguageProvider {
         add(FTBUnearthed.MODID + ".gui.food_remaining", "Remaining: %s");
         add(FTBUnearthed.MODID + ".gui.no_food.1", "No Speed Boost!");
         add(FTBUnearthed.MODID + ".gui.no_food.2", "Insert some food in the top-left slot");
+
+        add(FTBUnearthed.MODID + ".message.unearther_level", "Unearther level for player '%s': %s");
 
         add(FTBUnearthed.MODID + ".tooltip.worker_profession", "Profession: %s");
         add(FTBUnearthed.MODID + ".tooltip.worker_type", "Village Type: %s");
