@@ -321,7 +321,9 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
                 foodBuffer = Math.max(0, foodBuffer - currentRecipe.getProcessingTime());
                 progress = internalProcessingTime;
                 if (level.random.nextFloat() < currentRecipe.getDamageChance()) {
-                    getToolStack().hurtAndBreak(1, level, null, item -> {});
+                    getToolStack().hurtAndBreak(1, level, null, item ->
+                            level.playSound(null, getBlockPos().above(2), item.getBreakingSound(), SoundSource.BLOCKS, 1f, 1f)
+                    );
                 }
             }
         }

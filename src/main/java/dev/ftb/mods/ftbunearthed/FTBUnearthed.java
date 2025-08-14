@@ -13,7 +13,6 @@ import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -74,7 +73,9 @@ public class FTBUnearthed {
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTab() == FTBLibrary.getCreativeModeTab().get()) {
             event.accept(ModBlocks.CORE.asItem());
+            event.accept(ModItems.CRUDE_BRUSH.get());
             event.accept(ModItems.REINFORCED_BRUSH.get());
+            event.accept(ModItems.UNBREAKABLE_BRUSH.get());
             event.accept(ModItems.WORKER_TOKEN.get());
         }
     }

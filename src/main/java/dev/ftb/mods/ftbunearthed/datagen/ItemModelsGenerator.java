@@ -17,7 +17,10 @@ public class ItemModelsGenerator extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
+        handheldItem(ModItems.CRUDE_BRUSH.get());
         handheldItem(ModItems.REINFORCED_BRUSH.get());
+        handheldItem(ModItems.UNBREAKABLE_BRUSH.get());
+
         simpleLayeredItem(ModItems.WORKER_TOKEN, "item/worker_token", "item/worker_layer1");
     }
 

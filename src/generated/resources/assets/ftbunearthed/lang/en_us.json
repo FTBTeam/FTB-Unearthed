@@ -25,6 +25,8 @@
   "ftbunearthed.villager_type.snow": "Plains",
   "ftbunearthed.villager_type.swamp": "Plains",
   "ftbunearthed.villager_type.taiga": "Plains",
+  "item.ftbunearthed.crude_brush": "Crude Brush",
   "item.ftbunearthed.reinforced_brush": "Reinforced Brush",
+  "item.ftbunearthed.unbreakable_brush": "Unbreakable Brush",
   "item.ftbunearthed.worker_token": "Worker Token"
 }

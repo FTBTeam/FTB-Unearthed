@@ -20,7 +20,11 @@ public class ItemTagsGenerator extends ItemTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
-        tag(Tags.Items.TOOLS_BRUSH).add(ModItems.REINFORCED_BRUSH.get());
+        tag(Tags.Items.TOOLS_BRUSH).add(
+                ModItems.CRUDE_BRUSH.get(),
+                ModItems.REINFORCED_BRUSH.get(),
+                ModItems.UNBREAKABLE_BRUSH.get()
+        );
         tag(FTBUnearthedTags.Items.WORKER_TOKENS).add(ModItems.WORKER_TOKEN.get());
     }
 }

@@ -25,7 +25,7 @@ public class UneartherFrameBlockEntity extends BlockEntity {
 
     public Optional<UneartherCoreBlockEntity> getCore() {
         if (corePosPending != null && level != null) {
-            // first core screen query since loaded from NBT
+            // first core query since loaded from NBT
             level.getBlockEntity(corePosPending, ModBlockEntityTypes.UNEARTHER_CORE.get()).ifPresentOrElse(
                     core -> {
                         this.core = new WeakReference<>(core);
@@ -40,7 +40,7 @@ public class UneartherFrameBlockEntity extends BlockEntity {
         return Optional.ofNullable(core.get());
     }
 
-    public void setCore(@NotNull UneartherCoreBlockEntity core) {
+    void setCore(@NotNull UneartherCoreBlockEntity core) {
         // this must ONLY be called from UneartherCoreBlock#onPlacedBy() !
         if (this.core.get() != null) {
             throw new IllegalStateException("core is already set and can't be changed!");

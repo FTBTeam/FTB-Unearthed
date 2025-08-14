@@ -1,6 +1,5 @@
 package dev.ftb.mods.ftbunearthed.crafting.recipe;
 
-import com.google.gson.JsonSyntaxException;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Either;

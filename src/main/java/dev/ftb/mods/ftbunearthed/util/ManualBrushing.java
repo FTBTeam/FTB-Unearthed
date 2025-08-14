@@ -9,6 +9,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -24,7 +25,7 @@ import java.util.Optional;
 public class ManualBrushing {
     private static final Map<ResourceLocation, Object2FloatMap<BlockPos>> brushProgress = new Object2ObjectOpenHashMap<>();
 
-    public static boolean tryManualBrushing(LivingEntity livingEntity, BlockHitResult blockHitResult) {
+    public static boolean tryManualBrushing(LivingEntity livingEntity, ItemStack stack, BlockHitResult blockHitResult) {
         if (!(livingEntity instanceof ServerPlayer player)) {
             return false;
         }
@@ -33,7 +34,7 @@ public class ManualBrushing {
         ItemStack input = player.level().getBlockState(pos).getBlock().asItem().getDefaultInstance();
 
         return findRecipe(player, input)
-                .map(recipe -> doBrushing(player, pos, recipe))
+                .map(recipe -> doBrushing(player, stack, pos, recipe))
                 .orElse(false);
     }
 
@@ -49,7 +50,7 @@ public class ManualBrushing {
         ).map(RecipeHolder::value);
     }
 
-    private static boolean doBrushing(ServerPlayer player, BlockPos pos, UneartherRecipe recipe) {
+    private static boolean doBrushing(ServerPlayer player, ItemStack stack, BlockPos pos, UneartherRecipe recipe) {
         Level level = player.level();
 
         Object2FloatMap<BlockPos> progressMap = brushProgress.computeIfAbsent(level.dimension().location(), k -> new Object2FloatOpenHashMap<>());
@@ -59,8 +60,15 @@ public class ManualBrushing {
 
         if (progress >= 10) {
             level.destroyBlock(pos, false, player);
-            recipe.generateOutputs(level.random).forEach(stack -> Block.popResource(level, pos, stack));
+            recipe.generateOutputs(level.random).forEach(output -> Block.popResource(level, pos, output));
             progressMap.removeFloat(pos);
+
+            if (player.getRandom().nextFloat() < recipe.getDamageChance()) {
+                EquipmentSlot slot = ItemStack.isSameItemSameComponents(stack, player.getItemBySlot(EquipmentSlot.OFFHAND)) ?
+                        EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
+                stack.hurtAndBreak(1, player, slot);
+            }
+
             sendBreakProgress(player, pos, 0);
         } else {
             sendBreakProgress(player, pos, (int) progress);

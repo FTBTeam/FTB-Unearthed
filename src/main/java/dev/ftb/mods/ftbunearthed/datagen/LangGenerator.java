@@ -21,7 +21,9 @@ public class LangGenerator extends LanguageProvider {
             }
         });
 
+        add(ModItems.CRUDE_BRUSH.get(), "Crude Brush");
         add(ModItems.REINFORCED_BRUSH.get(), "Reinforced Brush");
+        add(ModItems.UNBREAKABLE_BRUSH.get(), "Unbreakable Brush");
         add(ModItems.WORKER_TOKEN.get(), "Worker Token");
 
         add(FTBUnearthed.MODID + ".gui.speed_boost", "Speed Boost: %s%%");

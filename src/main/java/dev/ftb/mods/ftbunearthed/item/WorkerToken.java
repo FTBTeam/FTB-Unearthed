@@ -48,8 +48,6 @@ public class WorkerToken extends Item {
 
     public static Component tooltipLine(String what, String value) {
         return tooltipLine(what, Component.literal(value));
-//        return Component.translatable("ftbunearthed.tooltip." + what, Component.literal(value).withStyle(ChatFormatting.AQUA))
-//                .withStyle(ChatFormatting.YELLOW);
     }
 
     @Override
