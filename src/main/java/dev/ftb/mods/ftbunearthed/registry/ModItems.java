@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbunearthed.registry;
 
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
+import dev.ftb.mods.ftbunearthed.item.EchoEncoder;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.BlockItem;
@@ -27,6 +28,8 @@ public class ModItems {
             = ITEMS.register("unbreakable_brush", () -> new BrushItem(new Item.Properties().component(DataComponents.UNBREAKABLE, new Unbreakable(false)).stacksTo(1)));
     public static final DeferredItem<Item> WORKER_TOKEN
             = ITEMS.register("worker_token", () -> new WorkerToken(new Item.Properties()));
+    public static final DeferredItem<EchoEncoder> ECHO_ENCODER
+            = ITEMS.register("echo_encoder", () -> new EchoEncoder(new Item.Properties().durability(251).stacksTo(1)));
 
     public static DeferredItem<BlockItem> blockItem(String id, Supplier<? extends Block> sup) {
         return ITEMS.registerSimpleBlockItem(id, sup);

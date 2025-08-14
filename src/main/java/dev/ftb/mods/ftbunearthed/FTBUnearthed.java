@@ -3,15 +3,23 @@ package dev.ftb.mods.ftbunearthed;
 import com.mojang.logging.LogUtils;
 import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
+import dev.ftb.mods.ftbunearthed.block.UneartherCoreBlockEntity;
 import dev.ftb.mods.ftbunearthed.command.ModCommands;
 import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
 import dev.ftb.mods.ftbunearthed.entity.Worker;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.registry.*;
+import dev.ftb.mods.ftbunearthed.util.MiscUtil;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -21,6 +29,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.slf4j.Logger;
 
@@ -43,8 +52,8 @@ public class FTBUnearthed {
         modEventBus.addListener(this::registerCapabilities);
         modEventBus.addListener(this::registerEntityAttributes);
 
-        NeoForge.EVENT_BUS.addListener(this::onPlayerDeath);
         NeoForge.EVENT_BUS.addListener(this::addReloadListeners);
+        NeoForge.EVENT_BUS.addListener(this::onItemEquip);
         NeoForge.EVENT_BUS.addListener(WorkerToken::addTooltip);
         NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
     }
@@ -77,6 +86,7 @@ public class FTBUnearthed {
             event.accept(ModItems.REINFORCED_BRUSH.get());
             event.accept(ModItems.UNBREAKABLE_BRUSH.get());
             event.accept(ModItems.WORKER_TOKEN.get());
+            event.accept(ModItems.ECHO_ENCODER.get());
         }
     }
 
@@ -85,14 +95,16 @@ public class FTBUnearthed {
         event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, ModBlockEntityTypes.UNEARTHER_FRAME.get(), (be, side) -> be.getItemHandler());
     }
 
-    private void onPlayerDeath(PlayerEvent.Clone event) {
-        if (event.isWasDeath() && event.getOriginal().hasData(ModAttachmentTypes.UNEARTHER_LEVEL)) {
-            event.getEntity().setData(ModAttachmentTypes.UNEARTHER_LEVEL, event.getOriginal().getData(ModAttachmentTypes.UNEARTHER_LEVEL));
-        }
-    }
-
     private void addReloadListeners(AddReloadListenerEvent event) {
         event.addListener(new CacheReloadListener());
+    }
+
+    private void onItemEquip(LivingEquipmentChangeEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            if (event.getSlot().getType() == EquipmentSlot.Type.HAND && UneartherCoreBlockEntity.isKnownToolItem(player.level(), event.getTo())) {
+                player.displayClientMessage(MiscUtil.formatUneartherLevel(player), true);
+            }
+        }
     }
 
     private void registerEntityAttributes(EntityAttributeCreationEvent event) {

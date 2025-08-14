@@ -21,6 +21,8 @@ public class ItemModelsGenerator extends ItemModelProvider {
         handheldItem(ModItems.REINFORCED_BRUSH.get());
         handheldItem(ModItems.UNBREAKABLE_BRUSH.get());
 
+        handheldItem(ModItems.ECHO_ENCODER.get());
+
         simpleLayeredItem(ModItems.WORKER_TOKEN, "item/worker_token", "item/worker_layer1");
     }
 

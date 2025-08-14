@@ -25,13 +25,19 @@ public class LangGenerator extends LanguageProvider {
         add(ModItems.REINFORCED_BRUSH.get(), "Reinforced Brush");
         add(ModItems.UNBREAKABLE_BRUSH.get(), "Unbreakable Brush");
         add(ModItems.WORKER_TOKEN.get(), "Worker Token");
+        add(ModItems.ECHO_ENCODER.get(), "Echo Encoder");
 
         add(FTBUnearthed.MODID + ".gui.speed_boost", "Speed Boost: %s%%");
         add(FTBUnearthed.MODID + ".gui.food_remaining", "Remaining: %s");
         add(FTBUnearthed.MODID + ".gui.no_food.1", "No Speed Boost!");
         add(FTBUnearthed.MODID + ".gui.no_food.2", "Insert some food in the top-left slot");
 
-        add(FTBUnearthed.MODID + ".message.unearther_level", "Unearther level for player '%s': %s");
+        add(FTBUnearthed.MODID + ".message.unearther_level", "Unearther Level: %s (%s)");
+        add(FTBUnearthed.MODID + ".message.unearther_level.player", "Unearther Level for '%s': %s (%s)");
+        add(FTBUnearthed.MODID + ".message.item_too_damaged", "%s is too damaged!");
+
+        add(FTBUnearthed.MODID + ".tooltip.echo_encoder_usage", "Sneak + Right-click a villager to encode it into a Worker Token");
+        add(FTBUnearthed.MODID + ".tooltip.echo_encoder_charges", "Charges remaining: %s");
 
         add(FTBUnearthed.MODID + ".tooltip.worker_profession", "Profession: %s");
         add(FTBUnearthed.MODID + ".tooltip.worker_type", "Village Type: %s");

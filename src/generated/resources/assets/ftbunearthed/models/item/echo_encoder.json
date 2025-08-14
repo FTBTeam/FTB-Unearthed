@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "ftbunearthed:item/echo_encoder"
+  }
+}

@@ -31,7 +31,7 @@ public class SetLevelCommand {
 
     private static int setLevel(CommandContext<CommandSourceStack> ctx, ServerPlayer player, int level) {
         MiscUtil.setPlayerUneartherLevel(player, level);
-        ctx.getSource().sendSuccess(() -> Component.translatable("ftbunearthed.message.unearther_level", player.getDisplayName(), level), true);
+        ctx.getSource().sendSuccess(() -> MiscUtil.formatPlayerUneartherLevel(player), true);
         return Command.SINGLE_SUCCESS;
     }
 }

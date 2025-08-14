@@ -6,6 +6,7 @@ import dev.ftb.mods.ftbunearthed.crafting.recipe.UneartherRecipe;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
 import dev.ftb.mods.ftbunearthed.registry.ModItems;
+import dev.ftb.mods.ftbunearthed.util.MiscUtil;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -16,6 +17,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 
 public class UneartherCategory extends BaseUnearthedCategory<UneartherRecipe> {
@@ -37,7 +39,9 @@ public class UneartherCategory extends BaseUnearthedCategory<UneartherRecipe> {
                 .addRichTooltipCallback((recipeSlotView, tooltip) -> {
                     tooltip.add(WorkerToken.tooltipLine("worker_require_profession", workerData.getProfessionName()));
                     workerData.type().ifPresent(type -> tooltip.add(WorkerToken.tooltipLine("worker_require_type", type.toString())));
-                    String lvlStr = String.valueOf(workerData.getVillagerLevel());
+                    int lvl = workerData.getVillagerLevel();
+                    MutableComponent lvlStr = Component.literal(String.valueOf(lvl))
+                            .append(" (").append(Component.translatable("merchant.level." + lvl)).append(")");
                     tooltip.add(WorkerToken.tooltipLine("worker_require_level", lvlStr));
                 })
                 .addIngredient(VanillaTypes.ITEM_STACK, worker);

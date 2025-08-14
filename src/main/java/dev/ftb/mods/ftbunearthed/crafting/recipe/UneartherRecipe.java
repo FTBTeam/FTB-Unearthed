@@ -156,7 +156,7 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> implements Comp
                     Ingredient.CODEC_NONEMPTY.fieldOf("tool_item").forGetter(UneartherRecipe::getToolItem),
                     ExtraCodecs.POSITIVE_INT.optionalFieldOf("processing_time", 200).forGetter(UneartherRecipe::getProcessingTime),
                     ItemWithChance.CODEC.listOf().fieldOf("output_items").forGetter(UneartherRecipe::getOutputs),
-                    Codec.FLOAT.validate(this::zeroToOne).optionalFieldOf("damage_chance", 0.1f).forGetter(UneartherRecipe::getDamageChance)
+                    Codec.FLOAT.validate(this::zeroToOne).optionalFieldOf("damage_chance", 1.0f).forGetter(UneartherRecipe::getDamageChance)
             ).apply(builder, factory::create));
 
             streamCodec = StreamCodec.composite(

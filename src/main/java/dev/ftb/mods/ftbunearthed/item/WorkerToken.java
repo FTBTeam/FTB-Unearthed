@@ -5,6 +5,9 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbunearthed.FTBUnearthedTags;
 import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -12,11 +15,20 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.npc.VillagerData;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 import java.util.List;
@@ -35,7 +47,7 @@ public class WorkerToken extends Item {
                     List<Component> toolTip = event.getToolTip();
                     toolTip.add(tooltipLine("worker_profession", data.getProfessionName()));
                     toolTip.add(tooltipLine("worker_type", data.getVillagerTypeName()));
-                    toolTip.add(tooltipLine("worker_level", String.valueOf(data.getVillagerLevel())));
+                    toolTip.add(tooltipLine("worker_level", Component.translatable("merchant.level." + data.getVillagerLevel()).append(" (" + data.getVillagerLevel() + ")")));
                 }
             });
         }
@@ -50,6 +62,10 @@ public class WorkerToken extends Item {
         return tooltipLine(what, Component.literal(value));
     }
 
+    public static void setWorkerData(ItemStack token, WorkerData data) {
+        token.set(ModDataComponents.WORKER_DATA, data);
+    }
+
     @Override
     public Component getName(ItemStack stack) {
         Component defName = super.getName(stack);
@@ -60,6 +76,29 @@ public class WorkerToken extends Item {
 
     public static Optional<WorkerData> getWorkerData(ItemStack stack) {
         return Optional.ofNullable(stack.get(ModDataComponents.WORKER_DATA));
+    }
+
+    @Override
+    public InteractionResult useOn(UseOnContext context) {
+        return getWorkerData(context.getItemInHand()).map(workerData -> {
+            Player player = context.getPlayer();
+            if (context.getLevel() instanceof ServerLevel level && player != null) {
+                BlockPos pos = context.getClickedPos().relative(context.getClickedFace());
+                Villager villager = new Villager(EntityType.VILLAGER, level);
+                villager.setPos(Vec3.atBottomCenterOf(pos));
+                villager.lookAt(EntityAnchorArgument.Anchor.EYES, player.getEyePosition());
+                level.addFreshEntity(villager);
+                if (!player.isCreative()) {
+                    player.getItemInHand(context.getHand()).shrink(1);
+                }
+                villager.setVillagerXp(1);  // prevents the villager data from being immediately reset by dumb villager brain
+                villager.setVillagerData(workerData.toVillagerData());
+                level.playSound(null, villager.blockPosition(), SoundEvents.ENDER_PEARL_THROW, SoundSource.PLAYERS, 1f, 1f);
+                Vec3 vec = villager.getPosition(1f).add(0, 0, 0);
+                level.sendParticles(ParticleTypes.PORTAL, vec.x, vec.y, vec.z, 50, 0.2, 0.2, 0.2, 0.1);
+            }
+            return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
+        }).orElse(InteractionResult.FAIL);
     }
 
     // can't use VillagerData, sadly, because it doesn't override equals() and hashCode()
@@ -96,6 +135,10 @@ public class WorkerToken extends Item {
 
         public WorkerData(VillagerProfession profession, int level) {
             this(profession, Optional.empty(), Optional.of(level), false);
+        }
+
+        public static WorkerData fromVillagerData(VillagerData data) {
+            return new WorkerData(data.getProfession(), Optional.of(data.getType()), Optional.of(data.getLevel()), false);
         }
 
         public WorkerData hideTooltip(boolean hide) {

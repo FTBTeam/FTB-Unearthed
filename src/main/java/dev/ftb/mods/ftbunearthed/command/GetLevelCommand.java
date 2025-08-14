@@ -24,8 +24,7 @@ public class GetLevelCommand {
     }
 
     private static int getLevel(CommandContext<CommandSourceStack> ctx, ServerPlayer player) {
-        ctx.getSource().sendSuccess(() -> Component.translatable("ftbunearthed.message.unearther_level",
-                player.getDisplayName(), MiscUtil.getPlayerUneatherLevel(player)), true);
+        ctx.getSource().sendSuccess(() -> MiscUtil.formatPlayerUneartherLevel(player), true);
         return Command.SINGLE_SUCCESS;
     }
 }

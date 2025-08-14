@@ -13,6 +13,9 @@ public class ModAttachmentTypes {
             = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, FTBUnearthed.MODID);
 
     public static final Supplier<AttachmentType<Integer>> UNEARTHER_LEVEL = ATTACHMENT_TYPES.register(
-            "unearther_level", () -> AttachmentType.builder(() -> 1).serialize(Codec.INT).build()
+            "unearther_level", () -> AttachmentType.builder(() -> 1)
+                    .serialize(Codec.INT)
+                    .copyOnDeath()
+                    .build()
     );
 }

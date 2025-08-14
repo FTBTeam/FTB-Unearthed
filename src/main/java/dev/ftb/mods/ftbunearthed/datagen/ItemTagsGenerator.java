@@ -7,6 +7,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.ItemTagsProvider;
 import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -24,6 +25,10 @@ public class ItemTagsGenerator extends ItemTagsProvider {
                 ModItems.CRUDE_BRUSH.get(),
                 ModItems.REINFORCED_BRUSH.get(),
                 ModItems.UNBREAKABLE_BRUSH.get()
+        );
+        tag(ItemTags.DURABILITY_ENCHANTABLE).add(
+                ModItems.CRUDE_BRUSH.get(),
+                ModItems.REINFORCED_BRUSH.get()
         );
         tag(FTBUnearthedTags.Items.WORKER_TOKENS).add(ModItems.WORKER_TOKEN.get());
     }

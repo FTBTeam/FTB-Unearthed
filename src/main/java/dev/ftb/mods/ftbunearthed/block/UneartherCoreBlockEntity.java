@@ -32,6 +32,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -67,6 +69,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     private static final int COOLDOWN = 40;  // cool-off if output is clogged
     private static final int PROGRESS_MULT = 100;  // internal multiplier, allows for speed boosting
     public static final int MAX_FOOD_BUFFER = 24000; // in ticks, 20 minutes
+    private static final TargetingConditions WORKER_TARGETING = TargetingConditions.forNonCombat().ignoreLineOfSight();
 
     private final FoodHandler foodHandler = new FoodHandler();
     private final InputHandler inputHandler = new InputHandler();
@@ -94,7 +97,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
 
     private int clientProgress;
     private SyncedStatus syncedStatus = SyncedStatus.EMPTY;
-    private SyncedStatus lastSynced = null;
+    private SyncedStatus lastSynced = SyncedStatus.EMPTY;
     private boolean syncNeeded;
 
     public UneartherCoreBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -243,7 +246,6 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
                 return;  // shouldn't happen!
             }
 
-            // TODO get entity from component data on worker item
             Worker newWorker = new Worker(ModEntityTypes.WORKER.get(), level);
             newWorker.setVillagerData(workerData.toVillagerData());
             newWorker.setNoAi(true);
@@ -265,17 +267,18 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
 
         if (currentWorker instanceof Worker w) {
             w.setItemInHand(InteractionHand.MAIN_HAND, getToolStack().copy());
-            w.setYHeadRot(d.toYRot());
             Direction dir = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
             if (currentRecipe != null) {
-                w.lookAt(EntityAnchorArgument.Anchor.EYES, Vec3.atCenterOf(getBlockPos()).add(dir.getStepX(), 1, dir.getStepZ()));
+                w.lookAt(EntityAnchorArgument.Anchor.EYES, Vec3.atCenterOf(getBlockPos()).add(dir.getStepX(), 0.8, dir.getStepZ()));
                 w.setBusy(true);
             } else {
-                Player p = level.getNearestPlayer(w, 6.0);
-                if (p != null) {
-                    w.lookAt(EntityAnchorArgument.Anchor.EYES, p.getEyePosition());
-                } else {
-                    w.lookAt(EntityAnchorArgument.Anchor.EYES, Vec3.atCenterOf(getBlockPos()).add(dir.getStepX(), 1.5, dir.getStepZ()));
+                if (level.random.nextInt(20) == 0) {
+                    Entity p = level.getNearestEntity(LivingEntity.class, WORKER_TARGETING, w, w.getX(), w.getY(), w.getZ(), w.getBoundingBox().inflate(8));
+                    if (p != null) {
+                        w.lookAt(EntityAnchorArgument.Anchor.EYES, p.getEyePosition());
+                    } else {
+                        w.lookAt(EntityAnchorArgument.Anchor.EYES, Vec3.atCenterOf(getBlockPos()).add(dir.getStepX(), 1.5, dir.getStepZ()));
+                    }
                 }
                 w.setBusy(false);
             }

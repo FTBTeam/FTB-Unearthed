@@ -21,7 +21,7 @@ public class UneartherRecipeBuilder extends BaseRecipeBuilder<UneartherRecipe> {
         this.toolItem = toolItem;
         this.outputs = outputs;
         this.processingTime = 200;
-        this.damageChance = 0.1f;
+        this.damageChance = 1.0f;
     }
 
     public UneartherRecipeBuilder withProcessingTime(int time) {
