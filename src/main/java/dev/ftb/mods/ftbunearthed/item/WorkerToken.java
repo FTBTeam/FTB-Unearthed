@@ -167,7 +167,8 @@ public class WorkerToken extends Item {
         }
 
         public MutableComponent getVillagerTypeName() {
-            return Component.translatable("ftbunearthed.villager_type." + type().orElse(VillagerType.PLAINS));
+            var id = BuiltInRegistries.VILLAGER_TYPE.getKey(type().orElse(VillagerType.PLAINS));
+            return Component.translatable("ftbunearthed.villager_type." + id.toShortLanguageKey());
         }
     }
 }

@@ -38,7 +38,7 @@ public class UneartherCategory extends BaseUnearthedCategory<UneartherRecipe> {
         builder.addSlot(RecipeIngredientRole.CATALYST,6, 24)
                 .addRichTooltipCallback((recipeSlotView, tooltip) -> {
                     tooltip.add(WorkerToken.tooltipLine("worker_require_profession", workerData.getProfessionName()));
-                    workerData.type().ifPresent(type -> tooltip.add(WorkerToken.tooltipLine("worker_require_type", type.toString())));
+                    workerData.type().ifPresent(type -> tooltip.add(WorkerToken.tooltipLine("worker_require_type", workerData.getVillagerTypeName())));
                     int lvl = workerData.getVillagerLevel();
                     MutableComponent lvlStr = Component.literal(String.valueOf(lvl))
                             .append(" (").append(Component.translatable("merchant.level." + lvl)).append(")");
