@@ -5,21 +5,19 @@ import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import dev.ftb.mods.ftbunearthed.block.UneartherCoreBlockEntity;
 import dev.ftb.mods.ftbunearthed.command.ModCommands;
+import dev.ftb.mods.ftbunearthed.config.ServerConfig;
+import dev.ftb.mods.ftbunearthed.config.StartupConfig;
 import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
 import dev.ftb.mods.ftbunearthed.entity.Worker;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.registry.*;
 import dev.ftb.mods.ftbunearthed.util.MiscUtil;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -30,7 +28,6 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
-import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
@@ -43,6 +40,7 @@ public class FTBUnearthed {
 
     public FTBUnearthed(IEventBus modEventBus) {
         ConfigManager.getInstance().registerStartupConfig(StartupConfig.STARTUP_CONFIG, MODID + ".settings");
+        ConfigManager.getInstance().registerServerConfig(ServerConfig.SERVER_CONFIG, MODID + ".server", false);
 
         modEventBus.addListener(this::commonSetup);
 

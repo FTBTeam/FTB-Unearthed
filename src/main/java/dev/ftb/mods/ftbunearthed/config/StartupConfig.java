@@ -1,7 +1,8 @@
-package dev.ftb.mods.ftbunearthed;
+package dev.ftb.mods.ftbunearthed.config;
 
 import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
+import dev.ftb.mods.ftbunearthed.FTBUnearthed;
 
 public interface StartupConfig {
     SNBTConfig STARTUP_CONFIG = SNBTConfig.create(FTBUnearthed.MODID + "-startup");

@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbunearthed.util;
 
+import dev.ftb.mods.ftbunearthed.config.ServerConfig;
 import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
 import dev.ftb.mods.ftbunearthed.crafting.recipe.UneartherRecipe;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
@@ -54,7 +55,8 @@ public class ManualBrushing {
         Level level = player.level();
 
         Object2FloatMap<BlockPos> progressMap = brushProgress.computeIfAbsent(level.dimension().location(), k -> new Object2FloatOpenHashMap<>());
-        float step = 1 / (recipe.getProcessingTime() / 100f);
+        float duration = recipe.getProcessingTime() / ServerConfig.MANUAL_BRUSHING_SPEEDUP.get().floatValue();
+        float step = 1 / (duration / 100f);
         float progress = progressMap.getOrDefault(pos, 0f) + step;
         progressMap.put(pos, progress);
 

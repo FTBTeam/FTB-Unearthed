@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbunearthed.crafting;
 
 import com.mojang.serialization.MapCodec;
-import dev.ftb.mods.ftbunearthed.StartupConfig;
+import dev.ftb.mods.ftbunearthed.config.StartupConfig;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.common.conditions.ICondition;
 
