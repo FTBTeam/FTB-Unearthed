@@ -13,12 +13,14 @@ import dev.ftb.mods.ftbunearthed.integration.ultimine.UltimineIntegration;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.registry.*;
 import dev.ftb.mods.ftbunearthed.util.MiscUtil;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -86,8 +88,12 @@ public class FTBUnearthed {
             event.accept(ModItems.CRUDE_BRUSH.get());
             event.accept(ModItems.REINFORCED_BRUSH.get());
             event.accept(ModItems.UNBREAKABLE_BRUSH.get());
-            event.accept(ModItems.WORKER_TOKEN.get());
             event.accept(ModItems.ECHO_ENCODER.get());
+            BuiltInRegistries.VILLAGER_PROFESSION.forEach(profession -> {
+                ItemStack stack = ModItems.WORKER_TOKEN.toStack();
+                WorkerToken.setWorkerData(stack, new WorkerToken.WorkerData(profession, 1));
+                event.accept(stack);
+            });
         }
     }
 
