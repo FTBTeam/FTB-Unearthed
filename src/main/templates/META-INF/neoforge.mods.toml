@@ -95,7 +95,7 @@ config="${mod_id}.mixins.json"
 [[dependencies.${mod_id}]]
   modId="ftbultimine"
   type="optional"
-  versionRange="[${ftb_library_version},)"
+  versionRange="[${ftb_ultimine_version},)"
   ordering="NONE"
   side="BOTH"
 
