@@ -29,11 +29,15 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.npc.VillagerData;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -56,6 +60,7 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import snownee.jade.addon.harvest.ToolHandler;
 
 import java.util.List;
 import java.util.Objects;
@@ -241,7 +246,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         Direction d = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
         if (!getWorkerStack().isEmpty() && currentWorker == null) {
             // (re)spawn worker entity
-            WorkerToken.WorkerData workerData = getWorkerStack().get(ModDataComponents.WORKER_DATA);
+            WorkerToken.WorkerData workerData = WorkerToken.getWorkerData(getWorkerStack());
             if (workerData == null) {
                 return;  // shouldn't happen!
             }
@@ -281,6 +286,17 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
                     }
                 }
                 w.setBusy(false);
+            }
+            if (!getWorkerStack().isEmpty()) {
+                WorkerToken.WorkerData workerData = WorkerToken.getWorkerData(getWorkerStack());
+                if (workerData != null) {
+                    VillagerData data1 = w.getVillagerData();
+                    VillagerData data2 = workerData.toVillagerData();
+                    if (data1.getProfession() != data2.getProfession() || data1.getLevel() != data2.getLevel() || data1.getType() != data2.getType()) {
+                        // this can happen if the token is swapped in gui without emptying the slot
+                        w.setVillagerData(data2);
+                    }
+                }
             }
         }
     }
@@ -328,8 +344,23 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
                             level.playSound(null, getBlockPos().above(2), item.getBreakingSound(), SoundSource.BLOCKS, 1f, 1f)
                     );
                 }
+                if (WorkerToken.addWorkerXP(workerHandler.getStackInSlot(0), 1)) {
+                    workerLevelUp(level);
+                }
             }
         }
+    }
+
+    private void workerLevelUp(ServerLevel level) {
+        Vec3 vec = Vec3.atCenterOf(getBlockPos().above(2));
+        RandomSource r = level.getRandom();
+        level.sendParticles(ParticleTypes.HAPPY_VILLAGER, vec.x, vec.y, vec.z, 15, r.nextDouble() - 0.5, r.nextDouble() - 0.5, r.nextDouble() - 0.5, 0.05);
+        level.playSound(null, getBlockPos().above(), SoundEvents.VILLAGER_CELEBRATE, SoundSource.BLOCKS, 1f, 1f);
+        if (level.getEntity(workerID) instanceof Villager v) {
+            WorkerToken.WorkerData data = WorkerToken.getWorkerData(workerHandler.getStackInSlot(0));
+            v.setVillagerData(data.toVillagerData());
+        }
+        recheckRecipe = true;
     }
 
     private Optional<RecipeHolder<UneartherRecipe>> searchForRecipe() {

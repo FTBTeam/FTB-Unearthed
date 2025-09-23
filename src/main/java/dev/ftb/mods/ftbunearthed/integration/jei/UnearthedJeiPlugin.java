@@ -18,6 +18,7 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -60,7 +61,10 @@ public class UnearthedJeiPlugin implements IModPlugin {
         registration.registerSubtypeInterpreter(ModItems.WORKER_TOKEN.get(), new ISubtypeInterpreter<>() {
             @Override
             public @Nullable Object getSubtypeData(ItemStack ingredient, UidContext context) {
-                return WorkerToken.getWorkerData(ingredient).profession();
+                WorkerToken.WorkerData data = WorkerToken.getWorkerData(ingredient);
+                return context == UidContext.Ingredient ?
+                        new ProfessionAndLevel(data.profession(), data.getVillagerLevel()) :
+                        data.profession();
             }
 
             @Override
@@ -81,5 +85,8 @@ public class UnearthedJeiPlugin implements IModPlugin {
                 .filter(IHideableRecipe::shouldShow)
                 .toList();
         registration.addRecipes(jeiRecipeType, postProcessor.apply(recipes.reversed()));
+    }
+
+    public record ProfessionAndLevel(VillagerProfession profession, int level) {
     }
 }

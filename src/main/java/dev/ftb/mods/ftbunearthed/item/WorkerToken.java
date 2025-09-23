@@ -32,6 +32,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -39,6 +40,14 @@ public class WorkerToken extends Item {
     public WorkerToken(Properties properties) {
         super(properties);
     }
+
+    private static final int[] WORKER_XP_TABLE = new int[] {
+            0,   // start of level 1
+            40,  // total XP to get to level 2
+            280, // .. 3
+            600, // .. 4
+            1000 // .. 5
+    };
 
     public static void addTooltip(ItemTooltipEvent event) {
         if (event.getItemStack().is(FTBUnearthedTags.Items.WORKER_TOKENS)) {
@@ -48,6 +57,10 @@ public class WorkerToken extends Item {
                 toolTip.add(tooltipLine("worker_profession", data.getProfessionName()));
                 toolTip.add(tooltipLine("worker_type", data.getVillagerTypeName()));
                 toolTip.add(tooltipLine("worker_level", Component.translatable("merchant.level." + data.getVillagerLevel()).append(" (" + data.getVillagerLevel() + ")")));
+                int progress = getXPProgress(event.getItemStack());
+                if (progress > 0 && progress < 100) {
+                    toolTip.add(tooltipLine("worker_xp_progress", Integer.toString(progress)));
+                }
             }
         }
     }
@@ -78,6 +91,49 @@ public class WorkerToken extends Item {
 
     public static WorkerData getWorkerData(ItemStack stack) {
         return getOptionalWorkerData(stack).orElse(WorkerData.UNEMPLOYED);
+    }
+
+    public static boolean addWorkerXP(ItemStack stack, int amount) {
+        WorkerData data = getWorkerData(stack);
+        int lvl = data.getVillagerLevel();
+
+        if (data.profession == VillagerProfession.NONE || lvl >= 5) {
+            return false;
+        }
+
+        int currentXP = getWorkerXP(stack, data);
+        int neededXP = WORKER_XP_TABLE[data.getVillagerLevel()];
+        int newXP = currentXP + amount;
+
+        boolean levelUp = false;
+        if (currentXP < neededXP && newXP >= neededXP) {
+            levelUp = true;
+            setWorkerData(stack, new WorkerData(data.profession, data.type, Optional.of(data.getVillagerLevel() + 1), data.hideTooltip));
+        }
+        stack.set(ModDataComponents.WORKER_XP, newXP);
+
+        return levelUp;
+    }
+
+    public static int getXPProgress(ItemStack stack) {
+        WorkerData data = getWorkerData(stack);
+        int lvl = data.getVillagerLevel();
+        int currentXP = getWorkerXP(stack, data);
+        if (data.profession == VillagerProfession.NONE) {
+            return 0;
+        }
+        if (data.getVillagerLevel() >= 5) {
+            return 100;
+        }
+        int thisLvl = WORKER_XP_TABLE[lvl - 1];
+        int nextLvl = WORKER_XP_TABLE[lvl];
+
+        return (currentXP - thisLvl) * 100 / (nextLvl - thisLvl);
+    }
+
+    private static int getWorkerXP(ItemStack stack, WorkerData data) {
+        Integer xp = stack.get(ModDataComponents.WORKER_XP.get());
+        return Objects.requireNonNullElseGet(xp, () -> WORKER_XP_TABLE[data.getVillagerLevel() - 1]);
     }
 
     @Override

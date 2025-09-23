@@ -2,11 +2,13 @@ package dev.ftb.mods.ftbunearthed.client;
 
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
 import dev.ftb.mods.ftbunearthed.block.UneartherCoreBlockEntity;
+import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.menu.UneartherMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
@@ -56,6 +58,10 @@ public class UneartherScreen extends AbstractContainerScreen<UneartherMenu> {
                         Component.translatable("ftbunearthed.gui.no_food.2").withStyle(ChatFormatting.GRAY)
                 ), Optional.empty(), x, y);
             }
+        } else if (x >= leftPos + 45 && x <= leftPos + 48 && y >= topPos + 52 && y <= topPos + 70) {
+            int xpProgress = WorkerToken.getXPProgress(getMenu().getSlot(38).getItem());
+            MutableComponent line = Component.translatable("ftbunearthed.tooltip.worker_xp_progress", Component.literal(String.valueOf(xpProgress)));
+            guiGraphics.renderTooltip(font, line, x, y);
         }
     }
 
@@ -73,6 +79,12 @@ public class UneartherScreen extends AbstractContainerScreen<UneartherMenu> {
                     leftPos + 14, topPos + 18 + FOOD_BAR_HEIGHT + 1,
                     0xFF20A020, 0xFF008000
             );
+        }
+
+        int xpProgress = WorkerToken.getXPProgress(getMenu().getSlot(38).getItem());
+        if (xpProgress > 0) {
+            int y1 = (int) (69 - 16f * xpProgress / 100f);
+            guiGraphics.fill(leftPos + 45, topPos + y1, leftPos + 48, topPos + 69, 0xFFA0FF40);
         }
     }
 }

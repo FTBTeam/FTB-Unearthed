@@ -42,6 +42,7 @@ public class LangGenerator extends LanguageProvider {
         add(FTBUnearthed.MODID + ".tooltip.worker_profession", "Profession: %s");
         add(FTBUnearthed.MODID + ".tooltip.worker_type", "Village Type: %s");
         add(FTBUnearthed.MODID + ".tooltip.worker_level", "Level: %s");
+        add(FTBUnearthed.MODID + ".tooltip.worker_xp_progress", "Progress to Next Level: %s%%");
 
         add(FTBUnearthed.MODID + ".tooltip.worker_require_profession", "Required Profession: %s");
         add(FTBUnearthed.MODID + ".tooltip.worker_require_type", "Required Village Type: %s");
