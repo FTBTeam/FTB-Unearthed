@@ -3,11 +3,16 @@ package dev.ftb.mods.ftbunearthed.datagen;
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
 import dev.ftb.mods.ftbunearthed.crafting.ItemWithChance;
 import dev.ftb.mods.ftbunearthed.datagen.recipe.UneartherRecipeBuilder;
+import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken.WorkerData;
+import dev.ftb.mods.ftbunearthed.registry.ModItems;
+import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraft.world.entity.npc.VillagerType;
 import net.minecraft.world.item.ItemStack;
@@ -25,6 +30,11 @@ public class RecipesGenerator extends RecipeProvider {
 
     @Override
     protected void buildRecipes(RecipeOutput output) {
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, ModItems.WORKER_TOKEN.asItem())
+                .requires(ModItems.WORKER_TOKEN.asItem())
+                .unlockedBy("has_worker_token", has(ModItems.WORKER_TOKEN.asItem()))
+                .save(output, FTBUnearthed.id("worker_token_reset"));
+
         new UneartherRecipeBuilder("minecraft:sand", new WorkerData(VillagerProfession.MASON), Ingredient.of(Tags.Items.TOOLS_BRUSH), List.of(
                 new ItemWithChance(new ItemStack(Items.DIAMOND, 2), 0.1),
                 new ItemWithChance(Items.AMETHYST_SHARD.getDefaultInstance(), 0.3),
