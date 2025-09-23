@@ -16,7 +16,6 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 import java.util.Collection;
-import java.util.List;
 
 @Mod(value = FTBUnearthed.MODID, dist = Dist.CLIENT)
 public class FTBUnearthedClient {
@@ -40,7 +39,7 @@ public class FTBUnearthedClient {
 
     private static void registerItemColorHandlers(RegisterColorHandlersEvent.Item event) {
         event.register((stack, tintIndex) ->
-                        WorkerToken.getWorkerData(stack)
+                        WorkerToken.getOptionalWorkerData(stack)
                                 .filter(data -> tintIndex == 1)
                                 .map(data -> COLORS[Math.clamp(data.getVillagerLevel(), 1, 5) - 1])
                                 .orElse(0xFFFFFFFF),

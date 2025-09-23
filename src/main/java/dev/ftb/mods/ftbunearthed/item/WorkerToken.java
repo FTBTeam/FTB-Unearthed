@@ -42,14 +42,13 @@ public class WorkerToken extends Item {
 
     public static void addTooltip(ItemTooltipEvent event) {
         if (event.getItemStack().is(FTBUnearthedTags.Items.WORKER_TOKENS)) {
-            getWorkerData(event.getItemStack()).ifPresent(data -> {
-                if (!data.hideTooltip) {
-                    List<Component> toolTip = event.getToolTip();
-                    toolTip.add(tooltipLine("worker_profession", data.getProfessionName()));
-                    toolTip.add(tooltipLine("worker_type", data.getVillagerTypeName()));
-                    toolTip.add(tooltipLine("worker_level", Component.translatable("merchant.level." + data.getVillagerLevel()).append(" (" + data.getVillagerLevel() + ")")));
-                }
-            });
+            WorkerData data = getWorkerData(event.getItemStack());
+            if (!data.hideTooltip) {
+                List<Component> toolTip = event.getToolTip();
+                toolTip.add(tooltipLine("worker_profession", data.getProfessionName()));
+                toolTip.add(tooltipLine("worker_type", data.getVillagerTypeName()));
+                toolTip.add(tooltipLine("worker_level", Component.translatable("merchant.level." + data.getVillagerLevel()).append(" (" + data.getVillagerLevel() + ")")));
+            }
         }
     }
 
@@ -69,36 +68,37 @@ public class WorkerToken extends Item {
     @Override
     public Component getName(ItemStack stack) {
         Component defName = super.getName(stack);
-        return getWorkerData(stack)
-                .map(data -> defName.copy().append(" (").append(data.getProfessionName()).append(")"))
-                .orElse((MutableComponent) defName);
+        WorkerData data = getWorkerData(stack);
+        return defName.copy().append(" (").append(data.getProfessionName()).append(")");
     }
 
-    public static Optional<WorkerData> getWorkerData(ItemStack stack) {
+    public static Optional<WorkerData> getOptionalWorkerData(ItemStack stack) {
         return Optional.ofNullable(stack.get(ModDataComponents.WORKER_DATA));
+    }
+
+    public static WorkerData getWorkerData(ItemStack stack) {
+        return getOptionalWorkerData(stack).orElse(WorkerData.UNEMPLOYED);
     }
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        return getWorkerData(context.getItemInHand()).map(workerData -> {
-            Player player = context.getPlayer();
-            if (context.getLevel() instanceof ServerLevel level && player != null) {
-                BlockPos pos = context.getClickedPos().relative(context.getClickedFace());
-                Villager villager = new Villager(EntityType.VILLAGER, level);
-                villager.setPos(Vec3.atBottomCenterOf(pos));
-                villager.lookAt(EntityAnchorArgument.Anchor.EYES, player.getEyePosition());
-                level.addFreshEntity(villager);
-                if (!player.isCreative()) {
-                    player.getItemInHand(context.getHand()).shrink(1);
-                }
-                villager.setVillagerXp(1);  // prevents the villager data from being immediately reset by dumb villager brain
-                villager.setVillagerData(workerData.toVillagerData());
-                level.playSound(null, villager.blockPosition(), SoundEvents.ENDER_PEARL_THROW, SoundSource.PLAYERS, 1f, 1f);
-                Vec3 vec = villager.getPosition(1f).add(0, 0, 0);
-                level.sendParticles(ParticleTypes.PORTAL, vec.x, vec.y, vec.z, 50, 0.2, 0.2, 0.2, 0.1);
+        Player player = context.getPlayer();
+        if (context.getLevel() instanceof ServerLevel level && player != null) {
+            BlockPos pos = context.getClickedPos().relative(context.getClickedFace());
+            Villager villager = new Villager(EntityType.VILLAGER, level);
+            villager.setPos(Vec3.atBottomCenterOf(pos));
+            villager.lookAt(EntityAnchorArgument.Anchor.EYES, player.getEyePosition());
+            level.addFreshEntity(villager);
+            if (!player.isCreative()) {
+                player.getItemInHand(context.getHand()).shrink(1);
             }
-            return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
-        }).orElse(InteractionResult.FAIL);
+            villager.setVillagerXp(1);  // prevents the villager data from being immediately reset by dumb villager brain
+            villager.setVillagerData(getWorkerData(context.getItemInHand()).toVillagerData());
+            level.playSound(null, villager.blockPosition(), SoundEvents.ENDER_PEARL_THROW, SoundSource.PLAYERS, 1f, 1f);
+            Vec3 vec = villager.getPosition(1f).add(0, 0, 0);
+            level.sendParticles(ParticleTypes.PORTAL, vec.x, vec.y, vec.z, 50, 0.2, 0.2, 0.2, 0.1);
+        }
+        return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
     }
 
     // can't use VillagerData, sadly, because it doesn't override equals() and hashCode()
@@ -124,6 +124,7 @@ public class WorkerToken extends Item {
                 ByteBufCodecs.BOOL, WorkerData::hideTooltip,
                 WorkerData::new
         );
+        public static final WorkerData UNEMPLOYED = new WorkerData(VillagerProfession.NONE, 1);
 
         public WorkerData(VillagerProfession profession) {
             this(profession, Optional.empty(), Optional.empty(), false);
@@ -147,7 +148,7 @@ public class WorkerToken extends Item {
 
         @Override
         public boolean test(ItemStack workerStack) {
-            return WorkerToken.getWorkerData(workerStack).map(data -> {
+            return WorkerToken.getOptionalWorkerData(workerStack).map(data -> {
                 if (!data.profession.equals(this.profession)) return false;
                 if (this.type.isPresent() && !data.type.equals(this.type)) return false;
                 return data.getVillagerLevel() >= this.getVillagerLevel();
