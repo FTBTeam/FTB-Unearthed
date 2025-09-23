@@ -9,6 +9,7 @@ import dev.ftb.mods.ftbunearthed.config.ServerConfig;
 import dev.ftb.mods.ftbunearthed.config.StartupConfig;
 import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
 import dev.ftb.mods.ftbunearthed.entity.Worker;
+import dev.ftb.mods.ftbunearthed.integration.ultimine.UltimineIntegration;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.registry.*;
 import dev.ftb.mods.ftbunearthed.util.MiscUtil;
@@ -54,6 +55,8 @@ public class FTBUnearthed {
         NeoForge.EVENT_BUS.addListener(this::onItemEquip);
         NeoForge.EVENT_BUS.addListener(WorkerToken::addTooltip);
         NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
+
+        UltimineIntegration.init();
     }
 
     public static ResourceLocation id(String path) {
