@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbunearthed.integration.jei;
 
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
+import dev.ftb.mods.ftbunearthed.client.UneartherScreen;
 import dev.ftb.mods.ftbunearthed.crafting.IHideableRecipe;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.registry.ModBlocks;
@@ -12,10 +13,7 @@ import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.recipe.RecipeType;
-import mezz.jei.api.registration.IRecipeCatalystRegistration;
-import mezz.jei.api.registration.IRecipeCategoryRegistration;
-import mezz.jei.api.registration.IRecipeRegistration;
-import mezz.jei.api.registration.ISubtypeRegistration;
+import mezz.jei.api.registration.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.npc.VillagerProfession;
@@ -72,6 +70,11 @@ public class UnearthedJeiPlugin implements IModPlugin {
                 return "";
             }
         });
+    }
+
+    @Override
+    public void registerGuiHandlers(IGuiHandlerRegistration registration) {
+        registration.addRecipeClickArea(UneartherScreen.class, 87, 17, 21, 18, RecipeTypes.UNEARTHER);
     }
 
     private <I extends RecipeInput, T extends Recipe<I>> void addRecipeType(IRecipeRegistration registration, net.minecraft.world.item.crafting.RecipeType<T> mcRecipeType, RecipeType<T> jeiRecipeType) {

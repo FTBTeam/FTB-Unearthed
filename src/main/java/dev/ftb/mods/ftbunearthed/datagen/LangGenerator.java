@@ -34,7 +34,7 @@ public class LangGenerator extends LanguageProvider {
 
         add(FTBUnearthed.MODID + ".message.unearther_level", "Unearther Level: %s (%s)");
         add(FTBUnearthed.MODID + ".message.unearther_level.player", "Unearther Level for '%s': %s (%s)");
-        add(FTBUnearthed.MODID + ".message.item_too_damaged", "%s is too damaged!");
+        add(FTBUnearthed.MODID + ".message.item_too_damaged", "%s has no charges left!");
 
         add(FTBUnearthed.MODID + ".tooltip.echo_encoder_usage", "Sneak + Right-click a villager to encode it into a Worker Token");
         add(FTBUnearthed.MODID + ".tooltip.echo_encoder_charges", "Charges remaining: %s");
@@ -50,10 +50,10 @@ public class LangGenerator extends LanguageProvider {
 
         add(FTBUnearthed.MODID + ".villager_type.plains", "Plains");
         add(FTBUnearthed.MODID + ".villager_type.desert", "Desert");
-        add(FTBUnearthed.MODID + ".villager_type.jungle", "Plains");
-        add(FTBUnearthed.MODID + ".villager_type.savanna", "Plains");
-        add(FTBUnearthed.MODID + ".villager_type.snow", "Plains");
-        add(FTBUnearthed.MODID + ".villager_type.taiga", "Plains");
-        add(FTBUnearthed.MODID + ".villager_type.swamp", "Plains");
+        add(FTBUnearthed.MODID + ".villager_type.jungle", "Jungle");
+        add(FTBUnearthed.MODID + ".villager_type.savanna", "Savanna");
+        add(FTBUnearthed.MODID + ".villager_type.snow", "Snow");
+        add(FTBUnearthed.MODID + ".villager_type.taiga", "Taiga");
+        add(FTBUnearthed.MODID + ".villager_type.swamp", "Swamp");
     }
 }

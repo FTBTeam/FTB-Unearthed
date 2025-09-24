@@ -4,7 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbunearthed.FTBUnearthedTags;
 import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
+import dev.ftb.mods.ftbunearthed.registry.ModItems;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -41,6 +43,7 @@ public class WorkerToken extends Item {
         super(properties);
     }
 
+    // 4x the level thresholds for villager trading xp - see VillagerData#NEXT_LEVEL_XP_THRESHOLDS
     private static final int[] WORKER_XP_TABLE = new int[] {
             0,   // start of level 1
             40,  // total XP to get to level 2
@@ -76,6 +79,10 @@ public class WorkerToken extends Item {
 
     public static void setWorkerData(ItemStack token, WorkerData data) {
         token.set(ModDataComponents.WORKER_DATA, data);
+    }
+
+    public static ItemStack createWithData(WorkerData data) {
+        return Util.make(new ItemStack(ModItems.WORKER_TOKEN.get()), s -> setWorkerData(s, data));
     }
 
     @Override
@@ -145,14 +152,17 @@ public class WorkerToken extends Item {
             villager.setPos(Vec3.atBottomCenterOf(pos));
             villager.lookAt(EntityAnchorArgument.Anchor.EYES, player.getEyePosition());
             level.addFreshEntity(villager);
-            if (!player.isCreative()) {
-                player.getItemInHand(context.getHand()).shrink(1);
-            }
-            villager.setVillagerXp(1);  // prevents the villager data from being immediately reset by dumb villager brain
-            villager.setVillagerData(getWorkerData(context.getItemInHand()).toVillagerData());
+            WorkerData workerData = getWorkerData(context.getItemInHand());
+            // if we set villager xp to 0, worker data gets immediately reset by dumb villager brain
+            villager.setVillagerXp(Math.max(1, VillagerData.getMinXpPerLevel(workerData.getVillagerLevel())));
+            villager.setVillagerData(workerData.toVillagerData());
             level.playSound(null, villager.blockPosition(), SoundEvents.ENDER_PEARL_THROW, SoundSource.PLAYERS, 1f, 1f);
             Vec3 vec = villager.getPosition(1f).add(0, 0, 0);
             level.sendParticles(ParticleTypes.PORTAL, vec.x, vec.y, vec.z, 50, 0.2, 0.2, 0.2, 0.1);
+
+            if (!player.isCreative()) {
+                player.getItemInHand(context.getHand()).shrink(1);
+            }
         }
         return InteractionResult.sidedSuccess(context.getLevel().isClientSide);
     }

@@ -1,7 +1,6 @@
 package dev.ftb.mods.ftbunearthed.item;
 
 import dev.ftb.mods.ftbunearthed.item.WorkerToken.WorkerData;
-import dev.ftb.mods.ftbunearthed.registry.ModItems;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -38,8 +37,7 @@ public class EchoEncoder extends Item {
                     player.displayClientMessage(Component.translatable("ftbunearthed.message.item_too_damaged", stack.getHoverName()).withStyle(ChatFormatting.RED), true);
                     return InteractionResult.FAIL;
                 }
-                ItemStack token = ModItems.WORKER_TOKEN.asItem().getDefaultInstance();
-                WorkerToken.setWorkerData(token, WorkerData.fromVillagerData(villager.getVillagerData()));
+                ItemStack token = WorkerToken.createWithData(WorkerData.fromVillagerData(villager.getVillagerData()));
                 Block.popResource(player.level(), villager.blockPosition(), token);
 
                 serverLevel.playSound(null, villager.blockPosition(), SoundEvents.ENDERMAN_TELEPORT, SoundSource.PLAYERS, 1f, 1f);
@@ -63,7 +61,8 @@ public class EchoEncoder extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("ftbunearthed.tooltip.echo_encoder_charges", (stack.getMaxDamage() - stack.getDamageValue()) / DURABILITY_PER_USE).withStyle(ChatFormatting.YELLOW));
+        tooltipComponents.add(Component.translatable("ftbunearthed.tooltip.echo_encoder_charges",
+                (stack.getMaxDamage() - stack.getDamageValue()) / DURABILITY_PER_USE).withStyle(ChatFormatting.YELLOW));
         tooltipComponents.add(Component.translatable("ftbunearthed.tooltip.echo_encoder_usage").withStyle(ChatFormatting.GRAY));
     }
 }

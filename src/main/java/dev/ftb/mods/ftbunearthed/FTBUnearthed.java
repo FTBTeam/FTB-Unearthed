@@ -89,11 +89,9 @@ public class FTBUnearthed {
             event.accept(ModItems.REINFORCED_BRUSH.get());
             event.accept(ModItems.UNBREAKABLE_BRUSH.get());
             event.accept(ModItems.ECHO_ENCODER.get());
-            BuiltInRegistries.VILLAGER_PROFESSION.forEach(profession -> {
-                ItemStack stack = ModItems.WORKER_TOKEN.toStack();
-                WorkerToken.setWorkerData(stack, new WorkerToken.WorkerData(profession, 1));
-                event.accept(stack);
-            });
+            BuiltInRegistries.VILLAGER_PROFESSION.forEach(profession ->
+                    event.accept(WorkerToken.createWithData(new WorkerToken.WorkerData(profession)))
+            );
         }
     }
 
