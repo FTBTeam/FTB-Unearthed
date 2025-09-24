@@ -9,7 +9,6 @@ import dev.ftb.mods.ftbunearthed.entity.Worker;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.menu.UneartherMenu;
 import dev.ftb.mods.ftbunearthed.registry.ModBlockEntityTypes;
-import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
 import dev.ftb.mods.ftbunearthed.registry.ModEntityTypes;
 import dev.ftb.mods.ftbunearthed.registry.ModRecipes;
 import net.minecraft.Util;
@@ -60,7 +59,6 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import snownee.jade.addon.harvest.ToolHandler;
 
 import java.util.List;
 import java.util.Objects;
@@ -625,12 +623,16 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
 
     private class WorkerHandler extends FilteredInsertOnlyHandler {
         public WorkerHandler() {
-            super(stack -> stack.get(ModDataComponents.WORKER_DATA) != null);
+            super(WorkerHandler::checkWorker);
         }
 
         @Override
         public int getSlotLimit(int slot) {
             return 1;
+        }
+
+        private static boolean checkWorker(ItemStack stack) {
+            return WorkerToken.getWorkerData(stack).profession() != VillagerProfession.NONE;
         }
     }
 
