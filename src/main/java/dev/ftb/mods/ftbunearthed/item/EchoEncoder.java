@@ -31,7 +31,7 @@ public class EchoEncoder extends Item {
 
     @Override
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity interactionTarget, InteractionHand usedHand) {
-        if (interactionTarget instanceof Villager villager) {
+        if (interactionTarget instanceof Villager villager && villager.getAge() >= 0) {
             if (player.level() instanceof ServerLevel serverLevel) {
                 if (stack.getMaxDamage() - stack.getDamageValue() < DURABILITY_PER_USE) {
                     player.displayClientMessage(Component.translatable("ftbunearthed.message.item_too_damaged", stack.getHoverName()).withStyle(ChatFormatting.RED), true);
