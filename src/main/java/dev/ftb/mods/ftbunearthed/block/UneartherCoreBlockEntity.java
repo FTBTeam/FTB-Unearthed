@@ -59,6 +59,7 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import snownee.jade.addon.harvest.ToolHandler;
 
 import java.util.List;
 import java.util.Objects;
@@ -333,17 +334,19 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
                 ItemStack taken = inputHandler.extractItem(0, 1, true);
                 if (taken.isEmpty() || !tryGenerateOutputs(level)) {
                     cooldownTimer = COOLDOWN;
-                }
-                inputHandler.extractItem(0, 1, false);
-                foodBuffer = Math.max(0, foodBuffer - currentRecipe.getProcessingTime());
-                progress = internalProcessingTime;
-                if (level.random.nextFloat() < currentRecipe.getDamageChance()) {
-                    getToolStack().hurtAndBreak(1, level, null, item ->
-                            level.playSound(null, getBlockPos().above(2), item.getBreakingSound(), SoundSource.BLOCKS, 1f, 1f)
-                    );
-                }
-                if (WorkerToken.addWorkerXP(workerHandler.getStackInSlot(0), 1)) {
-                    workerLevelUp(level);
+                    progress = IDLING;
+                } else {
+                    inputHandler.extractItem(0, 1, false);
+                    foodBuffer = Math.max(0, foodBuffer - currentRecipe.getProcessingTime());
+                    progress = internalProcessingTime;
+                    if (level.random.nextFloat() < currentRecipe.getDamageChance()) {
+                        getToolStack().hurtAndBreak(1, level, null, item ->
+                                level.playSound(null, getBlockPos().above(2), item.getBreakingSound(), SoundSource.BLOCKS, 1f, 1f)
+                        );
+                    }
+                    if (WorkerToken.addWorkerXP(workerHandler.getStackInSlot(0), 1)) {
+                        workerLevelUp(level);
+                    }
                 }
             }
         }
@@ -381,15 +384,29 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         List<ItemStack> outputs = currentRecipe.generateOutputs(level.random);
         if (outputs.isEmpty()) return true;
 
-        boolean ok = false;
+        // record how much is in each slot right now, might need to reset it if we can't fit all the output
+        int[] slotCounts = new int[outputHandler.getSlots()];
+        for (int i = 0; i < outputHandler.getSlots(); i++) {
+            slotCounts[i] = outputHandler.getStackInSlot(i).getCount();
+        }
+
         for (ItemStack output: outputs) {
             ItemStack result = ItemHandlerHelper.insertItemStacked(outputHandler, output, false);
-            // if nothing at all can be inserted, go into cooldown
-            if (!ItemStack.matches(output, result)) {
-                ok = true;  // at least some of the stack could be inserted
+            if (!result.isEmpty()) {
+                // oops, can't fit this! reset slot counts to their previous value and give up
+                for (int i = 0; i < outputHandler.getSlots(); i++) {
+                    if (slotCounts[i] == 0) {
+                        outputHandler.setStackInSlot(i, ItemStack.EMPTY);
+                    } else {
+                        outputHandler.getStackInSlot(i).setCount(slotCounts[i]);
+                    }
+                }
+                return false;
             }
         }
-        return ok;
+
+        setChanged();
+        return true;
     }
 
     @Override
