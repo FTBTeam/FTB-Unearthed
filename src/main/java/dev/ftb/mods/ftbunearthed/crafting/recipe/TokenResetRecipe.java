@@ -21,7 +21,7 @@ public class TokenResetRecipe extends CustomRecipe {
     public boolean matches(CraftingInput input, Level level) {
         int nItems = 0;
         for (int i = 0; i < input.size(); i++) {
-            if (input.getItem(i).getItem() instanceof WorkerToken && ++nItems > 1) {
+            if (!(input.getItem(i).getItem() instanceof WorkerToken) || ++nItems > 1) {
                 return false;
             }
         }
