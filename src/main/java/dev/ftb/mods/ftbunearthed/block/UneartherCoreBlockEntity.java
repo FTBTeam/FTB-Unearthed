@@ -2,6 +2,8 @@ package dev.ftb.mods.ftbunearthed.block;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.ftb.mods.ftbunearthed.FTBUnearthedTags;
+import dev.ftb.mods.ftbunearthed.config.ServerConfig;
 import dev.ftb.mods.ftbunearthed.crafting.AcceptabilityCache;
 import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
 import dev.ftb.mods.ftbunearthed.crafting.recipe.UneartherRecipe;
@@ -305,10 +307,12 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         if (!food.isEmpty() && !getWorkerStack().isEmpty() && foodBuffer == 0) {
             FoodProperties props = food.getFoodProperties(null);
             if (props != null) {
-                int value = Math.min(MAX_FOOD_BUFFER, (int) (props.saturation() * 1200));  // one saturation = 1200 ticks or 1 minute
-                foodHandler.extractItem(0, 1, false);
-                foodBuffer += value;
-                currentSpeedBoost = props.nutrition() * 5;
+                int value = Math.min(ServerConfig.MAX_FOOD_BUFFER.get(), (int) (props.saturation() * 1200));  // one saturation = 1200 ticks or 1 minute
+                if (!food.is(FTBUnearthedTags.Items.UNLIMITED_FOOD_SOURCE)) {
+                    foodHandler.extractItem(0, 1, false);
+                }
+                foodBuffer += value * ServerConfig.FOOD_SATURATION_MULTIPLIER.get();
+                currentSpeedBoost = props.nutrition() * ServerConfig.FOOD_SPEED_BOOST_MULTIPLIER.get();
                 level.playSound(null, getBlockPos().above(2), SoundEvents.GENERIC_EAT, SoundSource.BLOCKS, 1f, 1f);
                 setChanged();
             }

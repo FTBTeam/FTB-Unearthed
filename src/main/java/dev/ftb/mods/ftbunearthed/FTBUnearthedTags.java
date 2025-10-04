@@ -8,5 +8,8 @@ public class FTBUnearthedTags {
     public static class Items {
         public static final TagKey<Item> WORKER_TOKENS
                 = TagKey.create(Registries.ITEM, FTBUnearthed.id("worker_tokens"));
+
+        public static final TagKey<Item> UNLIMITED_FOOD_SOURCE
+                = TagKey.create(Registries.ITEM, FTBUnearthed.id("unlimited_food_source"));
     }
 }

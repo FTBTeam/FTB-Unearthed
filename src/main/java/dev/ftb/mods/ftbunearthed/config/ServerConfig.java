@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbunearthed.config;
 
 import dev.ftb.mods.ftblibrary.snbt.config.DoubleValue;
+import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
 
@@ -13,4 +14,15 @@ public interface ServerConfig {
             .comment("Recipe duration multiplier for manual brushing, higher is faster",
                     "Recipe duration is divided by this value when using a brush manually."
             );
+
+    SNBTConfig UNEARTHER = SERVER_CONFIG.addGroup("unearther");
+
+    IntValue MAX_FOOD_BUFFER = UNEARTHER.addInt("max_food_buffer", 24000, 1, Integer.MAX_VALUE)
+            .comment("Maximum amount of food points (drumsticks) that can be stored in an Unearther");
+
+    IntValue FOOD_SATURATION_MULTIPLIER = UNEARTHER.addInt("food_saturation_multiplier", 1, 1, Integer.MAX_VALUE)
+            .comment("Used to multiply the amount of saturation a food item can provide");
+
+    IntValue FOOD_SPEED_BOOST_MULTIPLIER = UNEARTHER.addInt("food_speed_boost_multiplier", 1, 1, Integer.MAX_VALUE)
+            .comment("Used to multiply the amount of speed boost a food item can provide");
 }
