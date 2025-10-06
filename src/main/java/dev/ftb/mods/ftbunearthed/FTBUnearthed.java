@@ -5,6 +5,7 @@ import dev.ftb.mods.ftblibrary.FTBLibrary;
 import dev.ftb.mods.ftblibrary.config.manager.ConfigManager;
 import dev.ftb.mods.ftbunearthed.block.UneartherCoreBlockEntity;
 import dev.ftb.mods.ftbunearthed.command.ModCommands;
+import dev.ftb.mods.ftbunearthed.config.ClientConfig;
 import dev.ftb.mods.ftbunearthed.config.ServerConfig;
 import dev.ftb.mods.ftbunearthed.config.StartupConfig;
 import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
@@ -43,7 +44,8 @@ public class FTBUnearthed {
 
     public FTBUnearthed(IEventBus modEventBus) {
         ConfigManager.getInstance().registerStartupConfig(StartupConfig.STARTUP_CONFIG, MODID + ".settings");
-        ConfigManager.getInstance().registerServerConfig(ServerConfig.SERVER_CONFIG, MODID + ".server", false, ServerConfig::onChanged);
+        ConfigManager.getInstance().registerServerConfig(ServerConfig.SERVER_CONFIG, MODID + ".server", false);
+        ConfigManager.getInstance().registerClientConfig(ClientConfig.CLIENT_CONFIG, MODID + ".client", ClientConfig::onChanged);
 
         modEventBus.addListener(this::commonSetup);
 
@@ -90,7 +92,7 @@ public class FTBUnearthed {
             event.accept(ModItems.UNBREAKABLE_BRUSH.get());
             event.accept(ModItems.ECHO_ENCODER.get());
             BuiltInRegistries.VILLAGER_PROFESSION.forEach(profession ->
-                    event.accept(WorkerToken.createWithData(new WorkerToken.WorkerData(profession, ServerConfig.DEFAULT_VILLAGER_TYPE.get())))
+                    event.accept(WorkerToken.createWithData(new WorkerToken.WorkerData(profession, ClientConfig.DEFAULT_VILLAGER_TYPE.get())))
             );
         }
     }
