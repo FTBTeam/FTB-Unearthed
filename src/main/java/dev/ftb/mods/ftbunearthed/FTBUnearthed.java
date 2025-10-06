@@ -43,7 +43,7 @@ public class FTBUnearthed {
 
     public FTBUnearthed(IEventBus modEventBus) {
         ConfigManager.getInstance().registerStartupConfig(StartupConfig.STARTUP_CONFIG, MODID + ".settings");
-        ConfigManager.getInstance().registerServerConfig(ServerConfig.SERVER_CONFIG, MODID + ".server", false);
+        ConfigManager.getInstance().registerServerConfig(ServerConfig.SERVER_CONFIG, MODID + ".server", false, ServerConfig::onChanged);
 
         modEventBus.addListener(this::commonSetup);
 
@@ -90,7 +90,7 @@ public class FTBUnearthed {
             event.accept(ModItems.UNBREAKABLE_BRUSH.get());
             event.accept(ModItems.ECHO_ENCODER.get());
             BuiltInRegistries.VILLAGER_PROFESSION.forEach(profession ->
-                    event.accept(WorkerToken.createWithData(new WorkerToken.WorkerData(profession)))
+                    event.accept(WorkerToken.createWithData(new WorkerToken.WorkerData(profession, ServerConfig.DEFAULT_VILLAGER_TYPE.get())))
             );
         }
     }
