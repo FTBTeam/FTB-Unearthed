@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -57,7 +58,19 @@ public class ManualBrushing {
         Level level = player.level();
 
         // TODO this would be nicer as some kind of plugin system, but this works fine for now
-        Collection<BlockPos> allPositions = UltimineIntegration.getSelectedPositions(player, pos);
+        List<BlockPos> all0 = new ArrayList<>(UltimineIntegration.getSelectedPositions(player, pos));
+        if (all0.isEmpty()) {
+            return true;
+        }
+
+        // honour ultimine break prevention config, but only if we are brushing multiple blocks
+        int minToolDurability = all0.size() > 1 ? UltimineIntegration.minToolDurability() : 0;
+        int availableDurability = stack.getMaxDamage() > 0 ? stack.getMaxDamage() - stack.getDamageValue() - minToolDurability : Integer.MAX_VALUE;
+
+        List<BlockPos> allPositions = minToolDurability > 0 ? all0.subList(0, Math.min(all0.size(), availableDurability)) : all0;
+        if (allPositions.isEmpty()) {
+            return true;
+        }
 
         Object2FloatMap<BlockPos> progressMap = brushProgress.computeIfAbsent(level.dimension().location(), k -> new Object2FloatOpenHashMap<>());
         float duration = recipe.getProcessingTime() / ServerConfig.MANUAL_BRUSHING_SPEEDUP.get().floatValue();
@@ -69,17 +82,16 @@ public class ManualBrushing {
             sendBreakProgress(player, pos, allPositions, -1);
             allPositions.forEach(p1 -> {
                 level.destroyBlock(p1, false, player);
-                recipe.generateOutputs(level.random).forEach(output -> Block.popResource(level, pos, output));
+                recipe.generateOutputs(player.getRandom()).forEach(output -> Block.popResource(level, pos, output));
             });
             progressMap.removeFloat(pos);
 
-            int actualDamage = calculateToolDamage(allPositions.size(), recipe.getDamageChance());
-            if (actualDamage > 0) {
+            int toolDamage = calculateToolDamage(player.getRandom(), allPositions.size(), recipe.getDamageChance());
+            if (toolDamage > 0) {
                 EquipmentSlot slot = ItemStack.isSameItemSameComponents(stack, player.getItemBySlot(EquipmentSlot.OFFHAND)) ?
                         EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
-                stack.hurtAndBreak(Math.min(actualDamage, stack.getMaxDamage() - stack.getDamageValue() - 1), player, slot);
+                stack.hurtAndBreak(Math.min(toolDamage, availableDurability), player, slot);
             }
-
         } else {
             sendBreakProgress(player, pos, allPositions, (int) progress);
         }
@@ -87,11 +99,11 @@ public class ManualBrushing {
         return true;
     }
 
-    private static int calculateToolDamage(int nBlocks, float dmgChance) {
+    private static int calculateToolDamage(RandomSource random, int nBlocks, float dmgChance) {
         float damage = nBlocks * dmgChance;
         int damageI = (int) damage;
         float damageF = damage - damageI;
-        return damageI + (damageF > dmgChance ? 1 : 0);
+        return damageI + (random.nextFloat() < damageF ? 1 : 0);
     }
 
     private static void sendBreakProgress(ServerPlayer player, BlockPos pos0, Collection<BlockPos> allPositions, int progress) {

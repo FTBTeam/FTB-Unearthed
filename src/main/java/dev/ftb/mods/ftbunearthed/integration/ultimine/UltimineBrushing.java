@@ -1,6 +1,7 @@
 package dev.ftb.mods.ftbunearthed.integration.ultimine;
 
 import dev.ftb.mods.ftbultimine.api.FTBUltimineAPI;
+import dev.ftb.mods.ftbultimine.config.FTBUltimineServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -10,5 +11,9 @@ import java.util.Optional;
 public class UltimineBrushing {
     public static Optional<Collection<BlockPos>> getPositions(ServerPlayer player) {
         return FTBUltimineAPI.api().currentBlockSelection(player);
+    }
+
+    public static int minToolDurability() {
+        return FTBUltimineServerConfig.PREVENT_TOOL_BREAK.get();
     }
 }

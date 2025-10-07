@@ -19,4 +19,8 @@ public class UltimineIntegration {
                 UltimineBrushing.getPositions(player).orElse(List.of(origin)) :
                 List.of(origin);
     }
+
+    public static int minToolDurability() {
+        return ultimineInstalled ? UltimineBrushing.minToolDurability() : 0;
+    }
 }
