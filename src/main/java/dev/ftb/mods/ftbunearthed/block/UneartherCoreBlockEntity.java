@@ -61,7 +61,6 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import snownee.jade.addon.harvest.ToolHandler;
 
 import java.util.List;
 import java.util.Objects;

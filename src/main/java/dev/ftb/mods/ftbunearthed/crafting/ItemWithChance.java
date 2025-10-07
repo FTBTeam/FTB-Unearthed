@@ -54,17 +54,4 @@ public record ItemWithChance(ItemStack item, double chance) implements WeightedE
 			}
 		}
 	}
-
-//	public ItemStack produce(RandomSource rand) {
-//		ItemStack res = item.copy();
-//		if (bonusPct == 0) {
-//			return res;
-//		} else if (bonusPct >= 100) {
-//			res.grow(bonusPct / 100);
-//		}
-//		if (rand.nextInt(100) < bonusPct % 100) {
-//			res.grow(1);
-//		}
-//		return res;
-//	}
 }

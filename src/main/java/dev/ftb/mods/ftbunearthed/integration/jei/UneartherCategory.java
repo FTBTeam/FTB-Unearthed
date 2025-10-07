@@ -6,7 +6,6 @@ import dev.ftb.mods.ftbunearthed.crafting.recipe.UneartherRecipe;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
 import dev.ftb.mods.ftbunearthed.registry.ModItems;
-import dev.ftb.mods.ftbunearthed.util.MiscUtil;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;

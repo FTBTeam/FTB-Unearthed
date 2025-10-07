@@ -3,14 +3,7 @@ package dev.ftb.mods.ftbunearthed.config;
 import dev.ftb.mods.ftblibrary.snbt.config.DoubleValue;
 import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
-import dev.ftb.mods.ftblibrary.snbt.config.StringValue;
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
-import net.minecraft.ResourceLocationException;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.npc.VillagerType;
-import net.neoforged.neoforge.common.util.Lazy;
-import org.jetbrains.annotations.NotNull;
 
 public interface ServerConfig {
     SNBTConfig SERVER_CONFIG = SNBTConfig.create(FTBUnearthed.MODID + "-server");
