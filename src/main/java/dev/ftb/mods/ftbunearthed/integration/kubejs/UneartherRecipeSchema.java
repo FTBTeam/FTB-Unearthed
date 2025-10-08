@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface UneartherRecipeSchema {
     RecipeKey<List<ItemWithChance>> RESULTS = ItemWithChanceComponent.INSTANCE.asList().outputKey("output_items");
-    RecipeKey<String> INPUT_BLOCK = StringComponent.ANY.inputKey("input_block");
+    RecipeKey<String> INPUT_BLOCK = StringComponent.STRING.inputKey("input_block");
     RecipeKey<WorkerToken.WorkerData> WORKER_ITEM = WorkerDataComponent.INSTANCE.inputKey("worker");
     RecipeKey<Ingredient> TOOL_ITEM = IngredientComponent.INGREDIENT.inputKey("tool_item");
     RecipeKey<Integer> TIME = NumberComponent.INT.otherKey("processing_time").optional(200);
