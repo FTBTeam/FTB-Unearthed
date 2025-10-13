@@ -83,7 +83,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     private final ItemStackHandler outputHandler = new OutputHandler();
 
     // public capability access
-    private final IItemHandler publicItemHandler = new PublicItemWrapper();
+    private final IItemHandler publicItemHandler = new PublicItemHandler();
 
     private static final AcceptabilityCache<Item> knownInputItems = new AcceptabilityCache<>();
     private static final AcceptabilityCache<Item> knownToolItems = new AcceptabilityCache<>();
@@ -549,51 +549,51 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         return Optional.ofNullable(currentRecipe);
     }
 
-    private class PublicItemWrapper implements IItemHandler {
+    private class PublicItemHandler implements IItemHandler {
+        private final IItemHandler[] inputHandlers;
+
+        private PublicItemHandler() {
+            this.inputHandlers = new IItemHandler[] { inputHandler, foodHandler, toolHandler };
+        }
+
         @Override
         public int getSlots() {
-            return 2 + OUTPUT_SLOTS;
+            return inputHandlers.length + outputHandler.getSlots();
         }
 
         @Override
         public ItemStack getStackInSlot(int slot) {
-            return switch (slot) {
-                case 0 -> inputHandler.getStackInSlot(0);
-                case 1 -> foodHandler.getStackInSlot(0);
-                default -> outputHandler.getStackInSlot(slot - 2);
-            };
+            return slot < inputHandlers.length ?
+                    inputHandlers[slot].getStackInSlot(0) :
+                    outputHandler.getStackInSlot(slot - inputHandlers.length);
         }
 
         @Override
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            return switch (slot) {
-                case 0 -> inputHandler.insertItem(0, stack, simulate);
-                case 1 -> foodHandler.insertItem(0, stack, simulate);
-                default -> stack;
-            };
+            return slot < inputHandlers.length ?
+                    inputHandlers[slot].insertItem(0, stack, simulate) :
+                    stack;
         }
 
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            return slot >= 2 ? outputHandler.extractItem(slot - 2, amount, simulate) : ItemStack.EMPTY;
+            return slot < inputHandlers.length ?
+                    ItemStack.EMPTY :
+                    outputHandler.extractItem(slot - inputHandlers.length, amount, simulate);
         }
 
         @Override
         public int getSlotLimit(int slot) {
-            return switch (slot) {
-                case 0 -> inputHandler.getSlotLimit(0);
-                case 1 -> foodHandler.getSlotLimit(0);
-                default -> outputHandler.getSlotLimit(slot - 2);
-            };
+            return slot < inputHandlers.length ?
+                    inputHandlers[slot].getSlotLimit(0) :
+                    outputHandler.getSlotLimit(slot - inputHandlers.length);
         }
 
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
-            return switch (slot) {
-                case 0 -> inputHandler.isItemValid(0, stack);
-                case 1 -> foodHandler.isItemValid(0, stack);
-                default -> outputHandler.isItemValid(slot - 2, stack);
-            };
+            return slot < inputHandlers.length ?
+                    inputHandlers[slot].isItemValid(0, stack) :
+                    outputHandler.isItemValid(slot - inputHandlers.length, stack);
         }
     }
 
