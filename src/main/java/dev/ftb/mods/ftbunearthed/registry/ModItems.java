@@ -29,7 +29,8 @@ public class ModItems {
     public static final DeferredItem<Item> WORKER_TOKEN
             = ITEMS.register("worker_token", () -> new WorkerToken(new Item.Properties()));
     public static final DeferredItem<EchoEncoder> ECHO_ENCODER
-            = ITEMS.register("echo_encoder", () -> new EchoEncoder(new Item.Properties().durability(251).stacksTo(1)));
+            = ITEMS.register("echo_encoder", () -> new EchoEncoder(new Item.Properties()
+            .stacksTo(1).component(ModDataComponents.ENCODER_USES, 0)));
 
     public static DeferredItem<BlockItem> blockItem(String id, Supplier<? extends Block> sup) {
         return ITEMS.registerSimpleBlockItem(id, sup);

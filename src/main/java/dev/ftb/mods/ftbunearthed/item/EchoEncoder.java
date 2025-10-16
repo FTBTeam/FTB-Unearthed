@@ -1,15 +1,17 @@
 package dev.ftb.mods.ftbunearthed.item;
 
+import dev.ftb.mods.ftbunearthed.config.ServerConfig;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken.WorkerData;
+import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.Villager;
@@ -23,8 +25,6 @@ import net.minecraft.world.phys.Vec3;
 import java.util.List;
 
 public class EchoEncoder extends Item {
-    private static final int DURABILITY_PER_USE = 50;
-
     public EchoEncoder(Properties properties) {
         super(properties);
     }
@@ -33,7 +33,7 @@ public class EchoEncoder extends Item {
     public InteractionResult interactLivingEntity(ItemStack stack, Player player, LivingEntity interactionTarget, InteractionHand usedHand) {
         if (interactionTarget instanceof Villager villager && villager.getAge() >= 0) {
             if (player.level() instanceof ServerLevel serverLevel) {
-                if (stack.getMaxDamage() - stack.getDamageValue() < DURABILITY_PER_USE) {
+                if (getUseCount(stack) >= ServerConfig.ENCODER_MAX_USES.get()) {
                     player.displayClientMessage(Component.translatable("ftbunearthed.message.item_too_damaged", stack.getHoverName()).withStyle(ChatFormatting.RED), true);
                     return InteractionResult.FAIL;
                 }
@@ -51,7 +51,7 @@ public class EchoEncoder extends Item {
                 villager.releasePoi(MemoryModuleType.MEETING_POINT);
                 villager.discard();
 
-                stack.hurtAndBreak(DURABILITY_PER_USE, player, usedHand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+                incrementUseCount(stack);
             }
             return InteractionResult.sidedSuccess(player.level().isClientSide);
         }
@@ -61,8 +61,35 @@ public class EchoEncoder extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        tooltipComponents.add(Component.translatable("ftbunearthed.tooltip.echo_encoder_charges",
-                (stack.getMaxDamage() - stack.getDamageValue()) / DURABILITY_PER_USE).withStyle(ChatFormatting.YELLOW));
-        tooltipComponents.add(Component.translatable("ftbunearthed.tooltip.echo_encoder_usage").withStyle(ChatFormatting.GRAY));
+        int remaining = ServerConfig.ENCODER_MAX_USES.get() - getUseCount(stack);
+        tooltipComponents.add(Component.translatable("ftbunearthed.tooltip.echo_encoder_charges", remaining)
+                .withStyle(ChatFormatting.YELLOW));
+        tooltipComponents.add(Component.translatable("ftbunearthed.tooltip.echo_encoder_usage")
+                .withStyle(ChatFormatting.GRAY));
+    }
+
+    @Override
+    public int getBarWidth(ItemStack stack) {
+        float amount = Mth.clamp((float)getUseCount(stack) / ServerConfig.ENCODER_MAX_USES.get(), 0f, 1f);
+        return Math.round(13.0F - amount * 13.0F);
+    }
+
+    @Override
+    public int getBarColor(ItemStack stack) {
+        int amount = (int) (64 + 191 * Mth.clamp((float)(ServerConfig.ENCODER_MAX_USES.get() - getUseCount(stack)) / ServerConfig.ENCODER_MAX_USES.get(), 0f, 1f));
+        return 0xFF200000 | amount << 8 | amount;
+    }
+
+    @Override
+    public boolean isBarVisible(ItemStack stack) {
+        return true;
+    }
+
+    public static int getUseCount(ItemStack stack) {
+        return stack.getOrDefault(ModDataComponents.ENCODER_USES, 0);
+    }
+
+    private static void incrementUseCount(ItemStack stack) {
+        stack.set(ModDataComponents.ENCODER_USES, getUseCount(stack) + 1);
     }
 }

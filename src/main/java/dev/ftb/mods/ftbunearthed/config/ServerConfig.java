@@ -14,7 +14,8 @@ public interface ServerConfig {
             .comment("Recipe duration multiplier for manual brushing, higher is faster",
                     "Recipe duration is divided by this value when using a brush manually."
             );
-
+    IntValue ENCODER_MAX_USES = GENERAL.addInt("encoder_max_uses", 10, 1, Integer.MAX_VALUE)
+            .comment("Maximum number of times an encode may be used");
 
     SNBTConfig UNEARTHER = SERVER_CONFIG.addGroup("unearther");
 

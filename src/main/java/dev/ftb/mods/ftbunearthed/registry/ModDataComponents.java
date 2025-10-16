@@ -27,4 +27,13 @@ public class ModDataComponents {
             .persistent(Codec.INT)
             .networkSynchronized(ByteBufCodecs.INT)
     );
+
+    // number of times an echo encoder has been used
+    public static final Supplier<DataComponentType<Integer>> ENCODER_USES
+            = COMPONENTS.registerComponentType("encoder_uses", builder -> builder
+            .persistent(Codec.INT)
+            .networkSynchronized(ByteBufCodecs.INT)
+    );
+
+
 }
