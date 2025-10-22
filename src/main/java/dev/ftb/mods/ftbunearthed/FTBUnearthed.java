@@ -43,7 +43,7 @@ public class FTBUnearthed {
 
     public FTBUnearthed(IEventBus modEventBus) {
         ConfigManager.getInstance().registerStartupConfig(StartupConfig.STARTUP_CONFIG, MODID + ".settings");
-        ConfigManager.getInstance().registerServerConfig(ServerConfig.SERVER_CONFIG, MODID + ".server", false);
+        ConfigManager.getInstance().registerServerConfig(ServerConfig.SERVER_CONFIG, MODID + ".server", true);
         ConfigManager.getInstance().registerClientConfig(ClientConfig.CLIENT_CONFIG, MODID + ".client", ClientConfig::onChanged);
 
         modEventBus.addListener(this::commonSetup);

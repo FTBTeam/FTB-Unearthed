@@ -23,7 +23,8 @@ public interface ServerConfig {
             .comment("Maximum amount of food points (drumsticks) that can be stored in an Unearther");
 
     IntValue FOOD_SATURATION_MULTIPLIER = UNEARTHER.addInt("food_saturation_multiplier", 1, 1, Integer.MAX_VALUE)
-            .comment("Used to multiply the amount of saturation a food item can provide");
+            .comment("Used to multiply the amount of saturation a food item can provide",
+            "Food saturation determines how long the speed boost will last");
 
     IntValue FOOD_SPEED_BOOST_MULTIPLIER = UNEARTHER.addInt("food_speed_boost_multiplier", 1, 1, Integer.MAX_VALUE)
             .comment("Used to multiply the amount of speed boost a food item can provide");

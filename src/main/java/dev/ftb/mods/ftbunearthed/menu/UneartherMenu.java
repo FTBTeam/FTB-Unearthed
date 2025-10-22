@@ -1,10 +1,12 @@
 package dev.ftb.mods.ftbunearthed.menu;
 
 import dev.ftb.mods.ftbunearthed.block.UneartherCoreBlockEntity;
+import dev.ftb.mods.ftbunearthed.config.ServerConfig;
 import dev.ftb.mods.ftbunearthed.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbunearthed.registry.ModMenuTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -56,9 +58,7 @@ public class UneartherMenu extends AbstractContainerMenu {
     }
 
     public static UneartherMenu fromNetwork(int windowId, Inventory inventory, RegistryFriendlyByteBuf buf) {
-        UneartherMenu menu = new UneartherMenu(windowId, inventory, buf.readBlockPos(), new SimpleContainerData(4));
-        // TODO anything else to sync?
-        return menu;
+        return new UneartherMenu(windowId, inventory, buf.readBlockPos(), new SimpleContainerData(4));
     }
 
     @Override
@@ -105,7 +105,7 @@ public class UneartherMenu extends AbstractContainerMenu {
     }
 
     public float getFoodBuffer() {
-        return (float) data.get(2) / UneartherCoreBlockEntity.MAX_FOOD_BUFFER;
+        return Mth.clamp((float) data.get(2) / ServerConfig.MAX_FOOD_BUFFER.get(), 0f,1f);
     }
 
     public int getSpeedBoost() {

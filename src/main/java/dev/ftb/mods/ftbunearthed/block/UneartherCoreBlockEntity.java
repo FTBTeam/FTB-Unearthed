@@ -73,7 +73,6 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     private static final int IDLING = -1;
     private static final int COOLDOWN = 40;  // cool-off if output is clogged
     private static final int PROGRESS_MULT = 100;  // internal multiplier, allows for speed boosting
-    public static final int MAX_FOOD_BUFFER = 24000; // in ticks, 20 minutes
     private static final TargetingConditions WORKER_TARGETING = TargetingConditions.forNonCombat().ignoreLineOfSight();
 
     private final FoodHandler foodHandler = new FoodHandler();
@@ -306,11 +305,11 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         if (!food.isEmpty() && !getWorkerStack().isEmpty() && foodBuffer == 0) {
             FoodProperties props = food.getFoodProperties(null);
             if (props != null) {
-                int value = Math.min(ServerConfig.MAX_FOOD_BUFFER.get(), (int) (props.saturation() * 1200));  // one saturation = 1200 ticks or 1 minute
+                int value = (int) (props.saturation() * 1200);  // one saturation = 1200 ticks or 1 minute
                 if (!food.is(FTBUnearthedTags.Items.UNLIMITED_FOOD_SOURCE)) {
                     foodHandler.extractItem(0, 1, false);
                 }
-                foodBuffer += value * ServerConfig.FOOD_SATURATION_MULTIPLIER.get();
+                foodBuffer = Math.min(ServerConfig.MAX_FOOD_BUFFER.get(), foodBuffer + value * ServerConfig.FOOD_SATURATION_MULTIPLIER.get());
                 currentSpeedBoost = props.nutrition() * ServerConfig.FOOD_SPEED_BOOST_MULTIPLIER.get();
                 level.playSound(null, getBlockPos().above(2), SoundEvents.GENERIC_EAT, SoundSource.BLOCKS, 1f, 1f);
                 setChanged();

@@ -1,7 +1,7 @@
 package dev.ftb.mods.ftbunearthed.client;
 
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
-import dev.ftb.mods.ftbunearthed.block.UneartherCoreBlockEntity;
+import dev.ftb.mods.ftbunearthed.config.ServerConfig;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.menu.UneartherMenu;
 import net.minecraft.ChatFormatting;
@@ -50,7 +50,7 @@ public class UneartherScreen extends AbstractContainerScreen<UneartherMenu> {
             if (menu.getFoodBuffer() > 0) {
                 guiGraphics.renderTooltip(font, List.of(
                         Component.translatable("ftbunearthed.gui.speed_boost", +menu.getSpeedBoost()),
-                        Component.translatable("ftbunearthed.gui.food_remaining", +(int) (menu.getFoodBuffer() * UneartherCoreBlockEntity.MAX_FOOD_BUFFER / 20)).withStyle(ChatFormatting.GRAY)
+                        Component.translatable("ftbunearthed.gui.food_remaining", +(int) (menu.getFoodBuffer() * ServerConfig.MAX_FOOD_BUFFER.get() / 20)).withStyle(ChatFormatting.GRAY)
                 ), Optional.empty(), x, y);
             } else {
                 guiGraphics.renderTooltip(font, List.of(
