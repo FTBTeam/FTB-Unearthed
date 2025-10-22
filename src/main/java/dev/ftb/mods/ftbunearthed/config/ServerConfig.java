@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbunearthed.config;
 
+import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
 import dev.ftb.mods.ftblibrary.snbt.config.DoubleValue;
 import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
 import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
@@ -17,6 +18,10 @@ public interface ServerConfig {
     IntValue ENCODER_MAX_USES = GENERAL.addInt("encoder_max_uses", 10, 1, Integer.MAX_VALUE)
             .comment("Maximum number of times an encode may be used");
 
+    BooleanValue ENCODER_KEEPS_VILLAGER_LEVEL = GENERAL.addBoolean("encoder_keeps_village_level", false)
+            .comment("When encoding a villager, should the villager's level be preserved?",
+                    "Setting this to true makes the Encoder a convenient way to move villagers around...");
+
     SNBTConfig UNEARTHER = SERVER_CONFIG.addGroup("unearther");
 
     IntValue MAX_FOOD_BUFFER = UNEARTHER.addInt("max_food_buffer", 24000, 1, Integer.MAX_VALUE)
@@ -24,7 +29,7 @@ public interface ServerConfig {
 
     IntValue FOOD_SATURATION_MULTIPLIER = UNEARTHER.addInt("food_saturation_multiplier", 1, 1, Integer.MAX_VALUE)
             .comment("Used to multiply the amount of saturation a food item can provide",
-            "Food saturation determines how long the speed boost will last");
+                    "Food saturation determines how long the speed boost will last");
 
     IntValue FOOD_SPEED_BOOST_MULTIPLIER = UNEARTHER.addInt("food_speed_boost_multiplier", 1, 1, Integer.MAX_VALUE)
             .comment("Used to multiply the amount of speed boost a food item can provide");

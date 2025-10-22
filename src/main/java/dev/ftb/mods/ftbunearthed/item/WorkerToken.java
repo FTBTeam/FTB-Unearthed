@@ -3,6 +3,7 @@ package dev.ftb.mods.ftbunearthed.item;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbunearthed.FTBUnearthedTags;
+import dev.ftb.mods.ftbunearthed.config.ServerConfig;
 import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
 import dev.ftb.mods.ftbunearthed.registry.ModItems;
 import net.minecraft.ChatFormatting;
@@ -205,7 +206,10 @@ public class WorkerToken extends Item {
         }
 
         public static WorkerData fromVillagerData(VillagerData data) {
-            return new WorkerData(data.getProfession(), Optional.of(data.getType()), Optional.of(data.getLevel()), false);
+            Optional<Integer> lvl = ServerConfig.ENCODER_KEEPS_VILLAGER_LEVEL.get() ?
+                    Optional.of(data.getLevel()) :
+                    Optional.empty();
+            return new WorkerData(data.getProfession(), Optional.of(data.getType()), lvl, false);
         }
 
         public WorkerData hideTooltip(boolean hide) {
