@@ -186,9 +186,6 @@ publishing {
         }
     }
     repositories {
-        maven {
-            url "file://${project.projectDir}/repo"
-        }
         if (ftbPublishing.ftbToken) {
             maven {
                 url ftbPublishing.ftbURL
