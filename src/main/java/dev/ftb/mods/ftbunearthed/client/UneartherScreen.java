@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public class UneartherScreen extends AbstractContainerScreen<UneartherMenu> {
     private static final ResourceLocation TEXTURE = FTBUnearthed.id("textures/gui/unearther.png");
-    private static final ResourceLocation BURN_PROGRESS_SPRITE = ResourceLocation.withDefaultNamespace("container/furnace/burn_progress");
+    private static final ResourceLocation BURN_PROGRESS_SPRITE = FTBUnearthed.id("progress_arrow");
     private static final int FOOD_BAR_HEIGHT = 50;
 
     public UneartherScreen(UneartherMenu menu, Inventory playerInventory, Component title) {
