@@ -35,6 +35,8 @@ public class LangGenerator extends LanguageProvider {
         add(FTBUnearthed.MODID + ".message.unearther_level", "Unearther Level: %s (%s)");
         add(FTBUnearthed.MODID + ".message.unearther_level.player", "Unearther Level for '%s': %s (%s)");
         add(FTBUnearthed.MODID + ".message.item_too_damaged", "%s has no charges left!");
+        add(FTBUnearthed.MODID + ".message.obstructed_block", "Obstructed by block! Need 3x3x3 area");
+        add(FTBUnearthed.MODID + ".message.obstructed_entity", "Obstructed by entity! Need 3x3x3 area");
 
         add(FTBUnearthed.MODID + ".tooltip.echo_encoder_usage", "Sneak + Right-click a villager to encode it into a Worker Token");
         add(FTBUnearthed.MODID + ".tooltip.echo_encoder_charges", "Charges remaining: %s");

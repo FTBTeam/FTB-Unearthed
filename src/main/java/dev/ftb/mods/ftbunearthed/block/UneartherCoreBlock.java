@@ -56,14 +56,21 @@ public class UneartherCoreBlock extends Block implements EntityBlock {
     @Override
     public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
         if (!validatePlaceableBlock(context)) {
-            context.getPlayer().displayClientMessage(Component.literal("Obstructed by block!").withStyle(ChatFormatting.RED), true);
+            sendObstructedMessage(context.getPlayer(), "ftbunearthed.message.obstructed_block");
             return null;
         }
         if (!validatePlaceableEntity(context)) {
-            context.getPlayer().displayClientMessage(Component.literal("Obstructed by entity!").withStyle(ChatFormatting.RED), true);
+            sendObstructedMessage(context.getPlayer(), "ftbunearthed.message.obstructed_entity");
             return null;
         }
         return defaultBlockState().setValue(HORIZONTAL_FACING, context.getHorizontalDirection().getOpposite());
+    }
+
+    private void sendObstructedMessage(Player player, String msgKey) {
+        // sending only from server since some mods take it upon themselves to call getStateForPlacement() on the client...
+        if (player != null && !player.level().isClientSide()) {
+            player.displayClientMessage(Component.translatable(msgKey).withStyle(ChatFormatting.RED), true);
+        }
     }
 
     private boolean validatePlaceableBlock(BlockPlaceContext ctx) {
