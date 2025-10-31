@@ -34,7 +34,7 @@ public class UneartherCategory extends BaseUnearthedCategory<UneartherRecipe> {
         WorkerToken.WorkerData workerData = recipe.getWorkerData();
         ItemStack worker = ModItems.WORKER_TOKEN.get().getDefaultInstance();
         worker.set(ModDataComponents.WORKER_DATA, workerData.hideTooltip(true));
-        builder.addSlot(RecipeIngredientRole.CATALYST,6, 24)
+        builder.addSlot(RecipeIngredientRole.CATALYST,6, 13)
                 .addRichTooltipCallback((recipeSlotView, tooltip) -> {
                     tooltip.add(WorkerToken.tooltipLine("worker_require_profession", workerData.getProfessionName()));
                     workerData.type().ifPresent(type -> tooltip.add(WorkerToken.tooltipLine("worker_require_type", workerData.getVillagerTypeName())));
@@ -45,10 +45,10 @@ public class UneartherCategory extends BaseUnearthedCategory<UneartherRecipe> {
                 })
                 .addIngredient(VanillaTypes.ITEM_STACK, worker);
 
-        builder.addSlot(RecipeIngredientRole.CATALYST, 29, 24)
+        builder.addSlot(RecipeIngredientRole.CATALYST, 6, 34)
                 .addIngredients(recipe.getToolItem());
 
-        var inputBuilder = builder.addSlot(RecipeIngredientRole.INPUT, 52, 24);
+        var inputBuilder = builder.addSlot(RecipeIngredientRole.INPUT, 29, 24);
         recipe.getInputsForDisplay().forEach(input ->
                 input.ifLeft(stack -> inputBuilder.addIngredient(VanillaTypes.ITEM_STACK, stack))
                         .ifRight(fluid -> inputBuilder.addFluidStack(fluid, 1000L))
@@ -56,7 +56,7 @@ public class UneartherCategory extends BaseUnearthedCategory<UneartherRecipe> {
 
         int slot = 0;
         for (ItemWithChance output : recipe.getOutputs()) {
-            builder.addOutputSlot(94 + slot % 3 * 18, 6 + slot / 3 * 18)
+            builder.addOutputSlot(76 + slot % 4 * 18, 6 + slot / 4 * 18)
                     .addItemStack(output.item());
             slot++;
         }
@@ -64,7 +64,7 @@ public class UneartherCategory extends BaseUnearthedCategory<UneartherRecipe> {
 
     @Override
     public void createRecipeExtras(IRecipeExtrasBuilder builder, UneartherRecipe recipe, IFocusGroup focuses) {
-        builder.addAnimatedRecipeArrow(recipe.getProcessingTime()).setPosition(70, 24);
+        builder.addAnimatedRecipeArrow(recipe.getProcessingTime()).setPosition(50, 24);
     }
 
     @Override
@@ -75,11 +75,11 @@ public class UneartherCategory extends BaseUnearthedCategory<UneartherRecipe> {
         for (ItemWithChance output : recipe.getOutputs()) {
             PoseStack stack = guiGraphics.pose();
             stack.pushPose();
-            stack.translate(94 + slot % 3 * 18, 6 + slot / 3 * 18, 300f);
+            stack.translate(76 + slot % 4 * 18, 6 + slot / 4 * 18, 300f);
             stack.scale(0.5f, 0.5f, 1f);
             String weightStr = output.chance() > 0.01 ?
                     String.format("%d%%", (int)(output.chance() * 100.0)) :
-                    String.format("%s%%", String.format("%.1f", output.chance() * 100.0));
+                    String.format("%.1f%%", output.chance() * 100.0);
 
             guiGraphics.drawString(Minecraft.getInstance().font, Component.literal(weightStr).withStyle(ChatFormatting.YELLOW), 0, 0, 0xFFFFFF);
             stack.popPose();
