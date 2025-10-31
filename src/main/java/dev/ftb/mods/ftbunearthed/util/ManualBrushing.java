@@ -10,18 +10,14 @@ import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.*;
@@ -58,19 +54,13 @@ public class ManualBrushing {
         Level level = player.level();
 
         // TODO this would be nicer as some kind of plugin system, but this works fine for now
-        List<BlockPos> all0 = new ArrayList<>(UltimineIntegration.getSelectedPositions(player, pos));
-        if (all0.isEmpty()) {
+        List<BlockPos> allPositions = new ArrayList<>(UltimineIntegration.getSelectedPositions(player, pos));
+        if (allPositions.isEmpty()) {
             return true;
         }
 
         // honour ultimine break prevention config, but only if we are brushing multiple blocks
-        int minToolDurability = all0.size() > 1 ? UltimineIntegration.minToolDurability() : 0;
-        int availableDurability = stack.getMaxDamage() > 0 ? stack.getMaxDamage() - stack.getDamageValue() - minToolDurability : Integer.MAX_VALUE;
-
-        List<BlockPos> allPositions = minToolDurability > 0 ? all0.subList(0, Math.min(all0.size(), availableDurability)) : all0;
-        if (allPositions.isEmpty()) {
-            return true;
-        }
+        int minToolDurability = allPositions.size() > 1 ? UltimineIntegration.minToolDurability() : 0;
 
         Object2FloatMap<BlockPos> progressMap = brushProgress.computeIfAbsent(level.dimension().location(), k -> new Object2FloatOpenHashMap<>());
         float duration = recipe.getProcessingTime() / ServerConfig.MANUAL_BRUSHING_SPEEDUP.get().floatValue();
@@ -78,20 +68,22 @@ public class ManualBrushing {
         float progress = progressMap.getOrDefault(pos, 0f) + step;
         progressMap.put(pos, progress);
 
-        if (progress >= 10) {
+        if (progress >= 10f) {
             sendBreakProgress(player, pos, allPositions, -1);
-            allPositions.forEach(p1 -> {
+            EquipmentSlot slot = ItemStack.isSameItemSameComponents(stack, player.getItemBySlot(EquipmentSlot.OFFHAND)) ?
+                    EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
+            for (BlockPos p1 : allPositions) {
+                ItemStack tool = player.getItemBySlot(slot);
+                if (tool.isEmpty() || tool.getDamageValue() >= tool.getMaxDamage() - minToolDurability) {
+                    break;
+                }
                 level.destroyBlock(p1, false, player);
                 recipe.generateOutputs(player.getRandom()).forEach(output -> Block.popResource(level, pos, output));
-            });
-            progressMap.removeFloat(pos);
-
-            int toolDamage = calculateToolDamage(player.getRandom(), allPositions.size(), recipe.getDamageChance());
-            if (toolDamage > 0) {
-                EquipmentSlot slot = ItemStack.isSameItemSameComponents(stack, player.getItemBySlot(EquipmentSlot.OFFHAND)) ?
-                        EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
-                stack.hurtAndBreak(Math.min(toolDamage, availableDurability), player, slot);
+                if (recipe.getDamageChance() >= 1f || player.getRandom().nextFloat() < recipe.getDamageChance()) {
+                    stack.hurtAndBreak(1, player, slot);
+                }
             }
+            progressMap.removeFloat(pos);
         } else {
             sendBreakProgress(player, pos, allPositions, (int) progress);
         }
@@ -99,23 +91,11 @@ public class ManualBrushing {
         return true;
     }
 
-    private static int calculateToolDamage(RandomSource random, int nBlocks, float dmgChance) {
-        float damage = nBlocks * dmgChance;
-        int damageI = (int) damage;
-        float damageF = damage - damageI;
-        return damageI + (random.nextFloat() < damageF ? 1 : 0);
-    }
-
     private static void sendBreakProgress(ServerPlayer player, BlockPos pos0, Collection<BlockPos> allPositions, int progress) {
-        Vec3 vec = Vec3.atCenterOf(pos0);
-        for (ServerPlayer serverPlayer : player.getServer().getPlayerList().getPlayers()) {
-            if (serverPlayer != null && serverPlayer.level() == player.level() && serverPlayer.distanceToSqr(vec) < 1024.0) {
-                PacketDistributor.sendToPlayersTrackingChunk(
-                        (ServerLevel) serverPlayer.level(),
-                        new ChunkPos(serverPlayer.blockPosition()),
-                        SendMultibreakProgressMessage.create(pos0, allPositions, progress)
-                );
-            }
-        }
+        PacketDistributor.sendToPlayersTrackingChunk(
+                player.serverLevel(),
+                player.chunkPosition(),
+                SendMultibreakProgressMessage.create(pos0, allPositions, progress)
+        );
     }
 }
