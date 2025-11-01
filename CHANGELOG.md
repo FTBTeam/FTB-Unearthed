@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - JEI recipe display now has room for 12 output slots
 
 ### Fixed
-- Fixed behaviour with ultiming and brushes with low durability
+- Fixed behaviour with ultimining and brushes with low durability
 
 ## [21.1.3]
 
