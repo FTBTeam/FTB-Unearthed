@@ -1,10 +1,15 @@
 package dev.ftb.mods.ftbunearthed.config;
 
-import dev.ftb.mods.ftblibrary.snbt.config.BooleanValue;
-import dev.ftb.mods.ftblibrary.snbt.config.DoubleValue;
-import dev.ftb.mods.ftblibrary.snbt.config.IntValue;
-import dev.ftb.mods.ftblibrary.snbt.config.SNBTConfig;
+import dev.ftb.mods.ftblibrary.snbt.config.*;
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.npc.VillagerType;
+
+import java.util.Optional;
 
 public interface ServerConfig {
     SNBTConfig SERVER_CONFIG = SNBTConfig.create(FTBUnearthed.MODID + "-server");
@@ -22,6 +27,10 @@ public interface ServerConfig {
             .comment("When encoding a villager, should the villager's level be preserved?",
                     "Setting this to true makes the Encoder a convenient way to move villagers around...");
 
+    StringValue ENCODED_VILLAGER_TYPE = GENERAL.addString("encoded_villager_type", "ftb:stone")
+            .comment("Villager type to force encoding to. If this is empty or an invalid villager type,",
+                    "the villager current type is kept.");
+
     SNBTConfig UNEARTHER = SERVER_CONFIG.addGroup("unearther");
 
     IntValue MAX_FOOD_BUFFER = UNEARTHER.addInt("max_food_buffer", 24000, 1, Integer.MAX_VALUE)
@@ -34,4 +43,22 @@ public interface ServerConfig {
     IntValue FOOD_SPEED_BOOST_MULTIPLIER = UNEARTHER.addInt("food_speed_boost_multiplier", 1, 1, Integer.MAX_VALUE)
             .comment("Used to multiply the amount of speed boost a food item can provide");
 
+
+    static Optional<VillagerType> encodedVillagerType() {
+        if (!ENCODED_VILLAGER_TYPE.get().isEmpty()) {
+            try {
+                ResourceLocation typeId = ResourceLocation.parse(ENCODED_VILLAGER_TYPE.get());
+                return BuiltInRegistries.VILLAGER_TYPE
+                        .getOptional(ResourceKey.create(Registries.VILLAGER_TYPE, typeId))
+                        .or(() -> {
+                            FTBUnearthed.LOGGER.error("unknown 'encoded_villager_type' {}, ignoring", ENCODED_VILLAGER_TYPE.get());
+                            return Optional.empty();
+                        });
+            } catch (ResourceLocationException e) {
+                FTBUnearthed.LOGGER.error("invalid 'encoded_villager_type' {}, ignoring", ENCODED_VILLAGER_TYPE.get());
+            }
+        }
+
+        return Optional.empty();
+    }
 }
