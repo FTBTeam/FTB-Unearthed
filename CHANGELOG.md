@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [21.1.5]
+
+### Added
+- Added server config `encoded_villager_type` to force village type override for encoded villagers
+  - Default `ftb:stone`; if empty string or invalid, the villager's current type is used (error logged if invalid)
+
 ## [21.1.4]
 
 ### Changed
