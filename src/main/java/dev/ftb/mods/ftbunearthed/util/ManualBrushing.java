@@ -74,7 +74,7 @@ public class ManualBrushing {
                     EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
             for (BlockPos p1 : allPositions) {
                 ItemStack tool = player.getItemBySlot(slot);
-                if (tool.isEmpty() || tool.getDamageValue() >= tool.getMaxDamage() - minToolDurability) {
+                if (tool.isEmpty() || tool.isDamageableItem() && tool.getDamageValue() >= tool.getMaxDamage() - minToolDurability) {
                     break;
                 }
                 level.destroyBlock(p1, false, player);
