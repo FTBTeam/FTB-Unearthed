@@ -209,7 +209,8 @@ public class WorkerToken extends Item {
             Optional<Integer> lvl = ServerConfig.ENCODER_KEEPS_VILLAGER_LEVEL.get() ?
                     Optional.of(data.getLevel()) :
                     Optional.empty();
-            return new WorkerData(data.getProfession(), Optional.of(data.getType()), lvl, false);
+            VillagerType type = ServerConfig.encodedVillagerType().orElse(data.getType());
+            return new WorkerData(data.getProfession(), Optional.of(type), lvl, false);
         }
 
         public WorkerData hideTooltip(boolean hide) {
