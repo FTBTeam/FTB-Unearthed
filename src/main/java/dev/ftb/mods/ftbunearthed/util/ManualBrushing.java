@@ -17,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -72,7 +73,11 @@ public class ManualBrushing {
             sendBreakProgress(player, pos, allPositions, -1);
             EquipmentSlot slot = ItemStack.isSameItemSameComponents(stack, player.getItemBySlot(EquipmentSlot.OFFHAND)) ?
                     EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
+            BlockState origState = level.getBlockState(pos);
             for (BlockPos p1 : allPositions) {
+                if (level.getBlockState(p1) != origState) {
+                    continue;
+                }
                 ItemStack tool = player.getItemBySlot(slot);
                 if (tool.isEmpty() || tool.isDamageableItem() && tool.getDamageValue() >= tool.getMaxDamage() - minToolDurability) {
                     break;
