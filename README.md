@@ -12,11 +12,7 @@ The Unearther is a 3x3x3 multiblock which is auto-created when the item is place
 
 ### Automation
 
-The Unearther is a sided block for hopper/pipe purposes:
-
-* Insert food items at the top. Food makes the worker operate more quickly; better foods last longer and provide a bigger speed boost.
-* Insert input blocks on any side
-* Extract outputs from the bottom
+The Unearther is an unsided block for hopper/pipe purposes - input blocks, food and brushes can be inserted on any side and will go to the right slot, and output items can be extracted from any side. Worker tokens cannot be piped in, but must be inserted manually.
 
 ## Recipes
 
@@ -72,6 +68,14 @@ An example recipe:
 }
 ```
 
+An example KubeJS recipe, using the in-built recipe schema:
+```javascript
+ServerEvents.recipes((event) => {
+  // outputs, input-block, worker, brush, time-taken
+  event.recipes.ftbunearthed.unearther([ { item: "stick", count: 2, chance: 0.5 } ], "minecraft:oak_log", { profession: "minecraft:farmer", level: 1}, "#c:tools/brush", 40)
+})
+```
+
 ### Recipe Fields
 * `type` must always be `ftbunearthed:unearther`
 * `input_block` is a blockstate string or block tag (use a `#` prefix for block tags).
@@ -80,10 +84,10 @@ An example recipe:
 * `worker` represents the villager data needed for this recipe, which is matched against a **Worker Token** item (see next section). This has three fields:
   * `profession` is a villager profession, from the villager profession registry (any vanilla or modded profession is accepted here). This field is mandatory.
   * `type` is a villager type from the villager type registry, e.g. `plains`, `desert`, `taiga`... Optional; is a "don't care" value if omitted
-  * `level` is a villager trade level in the range 1..5. Optional; defaults to 1 if omitted. 
+  * `level` is a villager trade level in the range 1..5. Optional; defaults to 1 if omitted.
     * Any worker token used in the machine must have a `level` of at least this level for the recipe to be usable.
 * `tool_item` is the tool item (typically a vanilla **Brush**) which must be inserted into the machine and used by the worker
-* `damage_chance` is the chance (range 0.0..1.0) that the inserted tool item will take a point of durability damage each time a work cycle is done. 
+* `damage_chance` is the chance (range 0.0..1.0) that the inserted tool item will take a point of durability damage each time a work cycle is done.
   * Undamageable items are permitted in recipes, and will never be damaged, regardless of the value of this field
   * If the item accepts the Unbreaking enchantment, this will further reduce the chance of the item taking durability damage
   * This mod also adds an unbreakable **Reinforced Brush** item (which has no recipe by default; define a recipe in your modpack if you want to allow it to be used)
@@ -107,7 +111,7 @@ ServerEvents.recipes(event => {
 ## Worker Tokens
 Any inserted worker token item also has villager data in the same form as the `worker` field above, encoded in the `ftbunearthed:worker_data` item data component.
 
-Worker Tokens may be obtained with the `/give` command, e.g. 
+Worker Tokens may be obtained with the `/give` command, e.g.
 
 ```
 # Get a level 1 Mason token in the (default) Plains biome
