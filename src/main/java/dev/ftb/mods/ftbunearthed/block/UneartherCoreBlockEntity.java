@@ -2,6 +2,7 @@ package dev.ftb.mods.ftbunearthed.block;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import dev.ftb.mods.ftbunearthed.FTBUnearthed;
 import dev.ftb.mods.ftbunearthed.FTBUnearthedTags;
 import dev.ftb.mods.ftbunearthed.config.ServerConfig;
 import dev.ftb.mods.ftbunearthed.crafting.AcceptabilityCache;
@@ -55,6 +56,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
@@ -261,6 +263,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
             currentWorker = newWorker;
             level.playSound(null, getBlockPos().above(2), SoundEvents.VILLAGER_CELEBRATE, SoundSource.BLOCKS);
             setChanged();
+            workerEntitySanityCheck(level);
         } else if (getWorkerStack().isEmpty() && currentWorker != null) {
             level.playSound(null, getBlockPos().above(2), SoundEvents.VILLAGER_NO, SoundSource.BLOCKS);
             currentWorker.discard();
@@ -298,6 +301,18 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
                 }
             }
         }
+    }
+
+    private void workerEntitySanityCheck(ServerLevel level) {
+        // make sure we don't have rogue villagers inside the unearther...
+        AABB box = new AABB(getBlockPos().above()).inflate(1.0);
+        level.getEntities((Entity) null, box, e -> e instanceof Villager).forEach(e -> {
+            if (!e.getUUID().equals(workerID)) {
+                FTBUnearthed.LOGGER.warn("unexpected villager entity in unearther @ {}/{}: id={}, expected={}",
+                        level.dimension().location(), getBlockPos(), e.getUUID(), workerID);
+                e.discard();
+            }
+        });
     }
 
     private void processFoodSlot(ServerLevel level) {
