@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added some villager entity sanity checking to ensure only the correct entity is present within the Unearther
   - Should normally always be the case, but there are reports of duplicating villagers, cause unknown...
 - Hopefully fixed issues some players encountered with worker entities duplicating themselves
+- Fixed Ultimine brushing affecting blocks it shouldn't in shaped ultimine modes
 
 ## [21.1.6]
 
