@@ -243,7 +243,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         Entity currentWorker = level.getEntity(workerID);
 
         Direction d = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
-        if (!getWorkerStack().isEmpty() && currentWorker == null) {
+        if (!getWorkerStack().isEmpty() && currentWorker == null && workerID.equals(Util.NIL_UUID)) {
             // (re)spawn worker entity
             WorkerToken.WorkerData workerData = WorkerToken.getWorkerData(getWorkerStack());
             if (workerData == null) {
