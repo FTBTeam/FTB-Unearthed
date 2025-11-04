@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Added some villager entity sanity checking to ensure only the correct entity is present within the Unearther
   - Should normally always be the case, but there are reports of duplicating villagers, cause unknown...
+- Hopefully fixed issues some players encountered with worker entities duplicating themselves
 
 ## [21.1.6]
 
