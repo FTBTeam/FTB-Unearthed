@@ -36,12 +36,10 @@ public class WorkerRenderer extends VillagerRenderer {
 
         @Override
         public void render(PoseStack poseStack, MultiBufferSource buffer, int packedLight, Villager livingEntity, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-            boolean busy = livingEntity instanceof Worker w && w.isBusy();
             poseStack.pushPose();
-            float xOff = busy ? getMovingOffset(livingEntity, partialTick): 0f;
             poseStack.translate(0F, 0.4F, -0.4F);
-            if (busy) {
-                poseStack.mulPose(Axis.YP.rotationDegrees(xOff + 90));
+            if (livingEntity instanceof Worker w && w.isBusy()) {
+                poseStack.mulPose(Axis.YP.rotationDegrees(getBrushRotation(livingEntity, partialTick) + 90));
                 poseStack.translate(0f, -0.1f, 0f);
                 poseStack.mulPose(Axis.ZP.rotationDegrees(-60));
             } else {
@@ -52,7 +50,7 @@ public class WorkerRenderer extends VillagerRenderer {
             poseStack.popPose();
         }
 
-        private float getMovingOffset(LivingEntity e, float partialTick) {
+        private float getBrushRotation(LivingEntity e, float partialTick) {
             float t = (e.tickCount % 20 + partialTick) / 20 * Mth.TWO_PI;
             return Mth.sin(t) * 40f;
         }
