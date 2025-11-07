@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id 'net.neoforged.moddev' version '2.0.89'
     id 'idea'
-    id "me.modmuss50.mod-publish-plugin" version "0.7.2"
+    id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 }
 
 apply from: 'https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/changelog.gradle'
@@ -26,13 +26,6 @@ apply from: "https://raw.githubusercontent.com/FTBTeam/mods-meta/main/gradle/pub
 repositories {
     mavenLocal()
 
-//    maven {
-//        name = 'GeckoLib'
-//        url = 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
-//        content {
-//            includeGroup("software.bernie.geckolib")
-//        }
-//    }
     maven {
         url ="https://maven.architectury.dev/"
         content {
@@ -141,8 +134,6 @@ dependencies {
 
     implementation("curse.maven:jade-324717:${jade_curse_id}")
 
-//    implementation "software.bernie.geckolib:geckolib-neoforge-${minecraft_version}:${geckolib_version}"
-
     compileOnly("dev.latvian.mods:kubejs-neoforge:${kubejs_version}")
     compileOnly("dev.latvian.mods:rhino:${rhino_version}")
 }
@@ -163,7 +154,8 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_authors            : mod_authors,
             mod_description        : mod_description,
             ftb_library_version    : ftb_library_version,
-            ftb_ultimine_version   : ftb_ultimine_version
+            ftb_ultimine_version   : ftb_ultimine_version,
+            kubejs_version         : kubejs_version
     ]
     inputs.properties replaceProperties
     expand replaceProperties
@@ -225,7 +217,9 @@ publishMods {
     curseforge("curseforgeNeoForge") {
         from(curseForgeOptions, neoForgeOptions)
         projectId = curseforge_id
-        requires('geckolib')
+        requires('ftb-library-forge')
+        optional('ftb-ultimine-forge')
+        optional('kubejs')
     }
 }
 

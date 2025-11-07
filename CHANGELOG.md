@@ -5,12 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [21.1.8]
+
+### Added
+- Added `ru_ru` translation (thanks @BazZziliuS)
+
+### Changed
+- All Unearther blocks are now in the `c:relocation_not_supported` block tag
+- Updated KubeJS support to KubeJS 7.2 
+  - **IMPORTANT**: this release will not work with earlier versions of KubeJS!
+
+### Fixed
+- Worker villagers may no longer be converted to witches with a lightning strike
+
 ## [21.1.7]
 
 ### Fixed
 - Added some villager entity sanity checking to ensure only the correct entity is present within the Unearther
-  - Should normally always be the case, but there are reports of duplicating villagers, cause unknown...
-- Hopefully fixed issues some players encountered with worker entities duplicating themselves
+  - Fixes issues with duplicate worker villager entities spawning under certain circumstances
 - Fixed Ultimine brushing affecting blocks it shouldn't in shaped ultimine modes
 
 ## [21.1.6]
