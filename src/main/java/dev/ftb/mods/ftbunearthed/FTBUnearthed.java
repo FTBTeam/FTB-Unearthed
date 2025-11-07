@@ -20,6 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -30,6 +31,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
+import net.neoforged.neoforge.event.entity.living.LivingConversionEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import org.slf4j.Logger;
 
@@ -58,6 +60,7 @@ public class FTBUnearthed {
         NeoForge.EVENT_BUS.addListener(this::onItemEquip);
         NeoForge.EVENT_BUS.addListener(WorkerToken::addTooltip);
         NeoForge.EVENT_BUS.addListener(ModCommands::registerCommands);
+        NeoForge.EVENT_BUS.addListener(this::onVillagerConvert);
 
         UltimineIntegration.init();
     }
@@ -115,6 +118,12 @@ public class FTBUnearthed {
 
     private void registerEntityAttributes(EntityAttributeCreationEvent event) {
         event.put(ModEntityTypes.WORKER.get(), Worker.createAttributes().build());
+    }
+
+    private void onVillagerConvert(LivingConversionEvent.Pre event) {
+        if (event.getEntity() instanceof Worker && event.getOutcome() == EntityType.WITCH) {
+            event.setCanceled(true);
+        }
     }
 
     public static class CacheReloadListener implements PreparableReloadListener {
