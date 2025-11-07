@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - All Unearther blocks are now in the `c:relocation_not_supported` block tag
+- Worker villagers may no longer be converted to witches with a lightning strike
 
 ## [21.1.7]
 
