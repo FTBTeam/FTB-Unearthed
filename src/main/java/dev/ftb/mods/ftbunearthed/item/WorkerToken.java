@@ -154,8 +154,10 @@ public class WorkerToken extends Item {
             villager.lookAt(EntityAnchorArgument.Anchor.EYES, player.getEyePosition());
             level.addFreshEntity(villager);
             WorkerData workerData = getWorkerData(context.getItemInHand());
-            // if we set villager xp to 0, worker data gets immediately reset by dumb villager brain
-            villager.setVillagerXp(Math.max(1, VillagerData.getMinXpPerLevel(workerData.getVillagerLevel())));
+            if (workerData.profession() != VillagerProfession.NONE) {
+                // if we set villager xp to 0, worker data gets immediately reset by dumb villager brain
+                villager.setVillagerXp(Math.max(1, VillagerData.getMinXpPerLevel(workerData.getVillagerLevel())));
+            }
             villager.setVillagerData(workerData.toVillagerData());
             level.playSound(null, villager.blockPosition(), SoundEvents.ENDER_PEARL_THROW, SoundSource.PLAYERS, 1f, 1f);
             Vec3 vec = villager.getPosition(1f).add(0, 0, 0);
