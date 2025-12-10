@@ -24,7 +24,8 @@ public class ItemTagsGenerator extends ItemTagsProvider {
         tag(Tags.Items.TOOLS_BRUSH).add(
                 ModItems.CRUDE_BRUSH.get(),
                 ModItems.REINFORCED_BRUSH.get(),
-                ModItems.UNBREAKABLE_BRUSH.get()
+                ModItems.UNBREAKABLE_BRUSH.get(),
+                ModItems.SUPER_BRUSH.get()
         );
         tag(ItemTags.DURABILITY_ENCHANTABLE).add(
                 ModItems.CRUDE_BRUSH.get(),

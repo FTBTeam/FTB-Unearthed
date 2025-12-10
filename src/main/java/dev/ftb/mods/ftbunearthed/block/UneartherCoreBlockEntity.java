@@ -12,6 +12,7 @@ import dev.ftb.mods.ftbunearthed.entity.Worker;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import dev.ftb.mods.ftbunearthed.menu.UneartherMenu;
 import dev.ftb.mods.ftbunearthed.registry.ModBlockEntityTypes;
+import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
 import dev.ftb.mods.ftbunearthed.registry.ModEntityTypes;
 import dev.ftb.mods.ftbunearthed.registry.ModRecipes;
 import net.minecraft.Util;
@@ -178,6 +179,10 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         return toolHandler.getStackInSlot(0);
     }
 
+    public boolean hasSuperBrush() {
+        return getToolStack().has(ModDataComponents.SUPER_BRUSH);
+    }
+
     private @NotNull ItemStack getWorkerStack() {
         return workerHandler.getStackInSlot(0);
     }
@@ -316,18 +321,20 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
     }
 
     private void processFoodSlot(ServerLevel level) {
-        ItemStack food = foodHandler.getStackInSlot(0);
-        if (!food.isEmpty() && !getWorkerStack().isEmpty() && foodBuffer == 0) {
-            FoodProperties props = food.getFoodProperties(null);
-            if (props != null) {
-                int value = (int) (props.saturation() * 1200);  // one saturation = 1200 ticks or 1 minute
-                if (!food.is(FTBUnearthedTags.Items.UNLIMITED_FOOD_SOURCE)) {
-                    foodHandler.extractItem(0, 1, false);
+        if (!getWorkerStack().isEmpty() && foodBuffer == 0) {
+            ItemStack food = foodHandler.getStackInSlot(0);
+            if (!food.isEmpty()) {
+                FoodProperties props = food.getFoodProperties(null);
+                if (props != null) {
+                    int value = (int) (props.saturation() * 1200);  // one saturation = 1200 ticks or 1 minute
+                    if (!food.is(FTBUnearthedTags.Items.UNLIMITED_FOOD_SOURCE)) {
+                        foodHandler.extractItem(0, 1, false);
+                    }
+                    foodBuffer = Math.min(ServerConfig.MAX_FOOD_BUFFER.get(), foodBuffer + value * ServerConfig.FOOD_SATURATION_MULTIPLIER.get());
+                    currentSpeedBoost = props.nutrition() * ServerConfig.FOOD_SPEED_BOOST_MULTIPLIER.get();
+                    level.playSound(null, getBlockPos().above(2), SoundEvents.GENERIC_EAT, SoundSource.BLOCKS, 1f, 1f);
+                    setChanged();
                 }
-                foodBuffer = Math.min(ServerConfig.MAX_FOOD_BUFFER.get(), foodBuffer + value * ServerConfig.FOOD_SATURATION_MULTIPLIER.get());
-                currentSpeedBoost = props.nutrition() * ServerConfig.FOOD_SPEED_BOOST_MULTIPLIER.get();
-                level.playSound(null, getBlockPos().above(2), SoundEvents.GENERIC_EAT, SoundSource.BLOCKS, 1f, 1f);
-                setChanged();
             }
         }
     }
@@ -340,9 +347,13 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         }
 
         int step = PROGRESS_MULT;
-        if (foodBuffer > 0) {
-            step += currentSpeedBoost;
-            foodBuffer--;
+        boolean superBrush = hasSuperBrush();
+        int effectiveSpeedBoost = getEffectiveSpeedBoost();
+        if (foodBuffer > 0 || superBrush) {
+            step += effectiveSpeedBoost;
+            if (!superBrush) {
+                foodBuffer--;
+            }
         }
         if (progress > 0) {
             progress = Math.max(0, progress - step);
@@ -354,7 +365,6 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
                     progress = IDLING;
                 } else {
                     inputHandler.extractItem(0, 1, false);
-                    foodBuffer = Math.max(0, foodBuffer - currentRecipe.getProcessingTime());
                     progress = internalProcessingTime;
                     if (level.random.nextFloat() < currentRecipe.getDamageChance()) {
                         getToolStack().hurtAndBreak(1, level, null, item ->
@@ -462,8 +472,8 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
         }
     }
 
-    public int getCurrentSpeedBoost() {
-        return currentSpeedBoost;
+    public int getEffectiveSpeedBoost() {
+        return hasSuperBrush() ? ServerConfig.SUPER_BRUSH_SPEED_BOOST.get() : currentSpeedBoost;
     }
 
     public IItemHandler getWorkerHandler() {
@@ -706,7 +716,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
 
         static SyncedStatus create(UneartherCoreBlockEntity core) {
             int processingTime = core.getCurrentRecipe().map(UneartherRecipe::getProcessingTime).orElse(0);
-            int boost = core.getCurrentSpeedBoost();
+            int boost = core.getEffectiveSpeedBoost();
             BlockState state = core.getInputStack().getItem() instanceof BlockItem bi ? bi.getBlock().defaultBlockState() : Blocks.AIR.defaultBlockState();
             return new SyncedStatus(state, processingTime * 100 / (100 + boost));
         }

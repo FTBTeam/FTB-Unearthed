@@ -6,6 +6,8 @@ import dev.ftb.mods.ftbunearthed.item.WorkerToken;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.Unit;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
@@ -35,5 +37,10 @@ public class ModDataComponents {
             .networkSynchronized(ByteBufCodecs.INT)
     );
 
-
+    // if present on a tool, allows unearthing at any level
+    public static final Supplier<DataComponentType<Unit>> SUPER_BRUSH
+            = COMPONENTS.registerComponentType("super_brush", builder -> builder
+            .persistent(Unit.CODEC)
+            .networkSynchronized(StreamCodec.unit(Unit.INSTANCE))
+    );
 }

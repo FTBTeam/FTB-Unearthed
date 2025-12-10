@@ -37,7 +37,7 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 
 public class WorkerToken extends Item {
     public WorkerToken(Properties properties) {
@@ -127,7 +127,7 @@ public class WorkerToken extends Item {
         WorkerData data = getWorkerData(stack);
         int lvl = data.getVillagerLevel();
         int currentXP = getWorkerXP(stack, data);
-        if (data.profession == VillagerProfession.NONE) {
+        if (data.profession == VillagerProfession.NONE || lvl < 1) {
             return 0;
         }
         if (data.getVillagerLevel() >= 5) {
@@ -172,7 +172,7 @@ public class WorkerToken extends Item {
 
     // can't use VillagerData, sadly, because it doesn't override equals() and hashCode()
     public record WorkerData(VillagerProfession profession, Optional<VillagerType> type, Optional<Integer> level, boolean hideTooltip)
-            implements Predicate<ItemStack>
+            implements BiPredicate<ItemStack,Boolean>
     {
         public static final Codec<WorkerData> COMPONENT_CODEC = RecordCodecBuilder.create(builder -> builder.group(
                         BuiltInRegistries.VILLAGER_PROFESSION.byNameCodec()
@@ -220,11 +220,11 @@ public class WorkerToken extends Item {
         }
 
         @Override
-        public boolean test(ItemStack workerStack) {
+        public boolean test(ItemStack workerStack, Boolean ignoreLevel) {
             return WorkerToken.getOptionalWorkerData(workerStack).map(data -> {
                 if (!data.profession.equals(this.profession)) return false;
                 if (this.type.isPresent() && !data.type.equals(this.type)) return false;
-                return data.getVillagerLevel() >= this.getVillagerLevel();
+                return ignoreLevel || data.getVillagerLevel() >= this.getVillagerLevel();
             }).orElse(false);
         }
 
