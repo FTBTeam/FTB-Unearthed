@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [21.1.9]
+
+### Added
+- Added a new super powerful brush intended to be granted as a rare reward
+- Added `pt_br` translation (thanks @PrincessStelllar)
+
+### Fixed
+- When unemployed villagers are spawned from a Worker Token, they no longer get the initial 1 xp
+  - Villagers with a job do get the 1 xp (vanilla resets them to unemployed otherwise)
+
 ## [21.1.8]
 
 ### Added
