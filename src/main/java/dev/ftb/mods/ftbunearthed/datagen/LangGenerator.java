@@ -24,6 +24,7 @@ public class LangGenerator extends LanguageProvider {
         add(ModItems.CRUDE_BRUSH.get(), "Crude Brush");
         add(ModItems.REINFORCED_BRUSH.get(), "Reinforced Brush");
         add(ModItems.UNBREAKABLE_BRUSH.get(), "Unbreakable Brush");
+        add(ModItems.SUPER_BRUSH.get(), "⭑✸✰ Brush of the Cosmos ✰✸⭑");
         add(ModItems.WORKER_TOKEN.get(), "Worker Token");
         add(ModItems.ECHO_ENCODER.get(), "Echo Encoder");
 
@@ -37,6 +38,8 @@ public class LangGenerator extends LanguageProvider {
         add(FTBUnearthed.MODID + ".message.item_too_damaged", "%s has no charges left!");
         add(FTBUnearthed.MODID + ".message.obstructed_block", "Obstructed by block! Need 3x3x3 area");
         add(FTBUnearthed.MODID + ".message.obstructed_entity", "Obstructed by entity! Need 3x3x3 area");
+
+        add(FTBUnearthed.MODID + ".tooltip.super_brush", "Workers and Players work %s%% faster\nWorkers don't consume food\nWorkers always work at level 5");
 
         add(FTBUnearthed.MODID + ".tooltip.echo_encoder_usage", "Sneak + Right-click a villager to encode it into a Worker Token");
         add(FTBUnearthed.MODID + ".tooltip.echo_encoder_charges", "Charges remaining: %s");

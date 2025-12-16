@@ -5,6 +5,7 @@ import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
 import dev.ftb.mods.ftbunearthed.crafting.recipe.UneartherRecipe;
 import dev.ftb.mods.ftbunearthed.integration.ultimine.UltimineIntegration;
 import dev.ftb.mods.ftbunearthed.net.SendMultibreakProgressMessage;
+import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -63,22 +64,28 @@ public class ManualBrushing {
         // honour ultimine break prevention config, but only if we are brushing multiple blocks
         int minToolDurability = allPositions.size() > 1 ? UltimineIntegration.minToolDurability() : 0;
 
+        EquipmentSlot slot = ItemStack.isSameItemSameComponents(stack, player.getItemBySlot(EquipmentSlot.OFFHAND)) ?
+                EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
+        ItemStack tool = player.getItemBySlot(slot);
+
         Object2FloatMap<BlockPos> progressMap = brushProgress.computeIfAbsent(level.dimension().location(), k -> new Object2FloatOpenHashMap<>());
         float duration = recipe.getProcessingTime() / ServerConfig.MANUAL_BRUSHING_SPEEDUP.get().floatValue();
+        if (tool.has(ModDataComponents.SUPER_BRUSH)) {
+            float boost = (100 + ServerConfig.SUPER_BRUSH_SPEED_BOOST.get()) / 100f;
+            duration /= boost;
+        }
         float step = 1 / (duration / 100f);
         float progress = progressMap.getOrDefault(pos, 0f) + step;
         progressMap.put(pos, progress);
 
         if (progress >= 10f) {
             sendBreakProgress(player, pos, allPositions, -1);
-            EquipmentSlot slot = ItemStack.isSameItemSameComponents(stack, player.getItemBySlot(EquipmentSlot.OFFHAND)) ?
-                    EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
+
             BlockState origState = level.getBlockState(pos);
             for (BlockPos p1 : allPositions) {
                 if (level.getBlockState(p1) != origState) {
                     continue;
                 }
-                ItemStack tool = player.getItemBySlot(slot);
                 if (tool.isEmpty() || tool.isDamageableItem() && tool.getDamageValue() >= tool.getMaxDamage() - minToolDurability) {
                     break;
                 }

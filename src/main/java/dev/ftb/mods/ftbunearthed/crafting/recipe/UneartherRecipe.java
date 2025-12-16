@@ -9,6 +9,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.ftb.mods.ftbunearthed.crafting.ItemWithChance;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken.WorkerData;
+import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
 import dev.ftb.mods.ftbunearthed.registry.ModRecipes;
 import net.minecraft.commands.arguments.blocks.BlockPredicateArgument;
 import net.minecraft.core.Holder;
@@ -118,7 +119,7 @@ public class UneartherRecipe extends BaseRecipe<UneartherRecipe> implements Comp
 
     public boolean test(ItemStack inputStack, ItemStack workerStack, ItemStack toolStack) {
         // used by the unearther block entity
-        return isValidInput(inputStack) && workerData.test(workerStack) && toolItem.test(toolStack);
+        return isValidInput(inputStack) && workerData.test(workerStack, toolStack.has(ModDataComponents.SUPER_BRUSH)) && toolItem.test(toolStack);
     }
 
     public boolean testManual(ItemStack inputStack, int playerUneartherLevel, ItemStack toolStack) {

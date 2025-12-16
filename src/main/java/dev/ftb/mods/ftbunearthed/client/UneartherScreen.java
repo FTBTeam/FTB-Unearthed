@@ -1,5 +1,6 @@
 package dev.ftb.mods.ftbunearthed.client;
 
+import dev.ftb.mods.ftblibrary.util.TimeUtils;
 import dev.ftb.mods.ftbunearthed.FTBUnearthed;
 import dev.ftb.mods.ftbunearthed.config.ServerConfig;
 import dev.ftb.mods.ftbunearthed.item.WorkerToken;
@@ -52,10 +53,15 @@ public class UneartherScreen extends AbstractContainerScreen<UneartherMenu> {
         super.renderTooltip(guiGraphics, x, y);
 
         if (x >= leftPos + 8 && x <= leftPos + 14 && y >= topPos + 18 && y <= topPos + 68) {
-            if (menu.getFoodBuffer() > 0) {
+            boolean superBrush = menu.getUnearther().hasSuperBrush();
+            int boost = superBrush ? ServerConfig.SUPER_BRUSH_SPEED_BOOST.get() : menu.getSpeedBoost();
+            if (boost > 0) {
+                String remaining = superBrush ?
+                        "∞" :
+                        TimeUtils.getTimeString((int) (menu.getFoodBuffer() * ServerConfig.MAX_FOOD_BUFFER.get() * 50));
                 guiGraphics.renderTooltip(font, List.of(
-                        Component.translatable("ftbunearthed.gui.speed_boost", +menu.getSpeedBoost()),
-                        Component.translatable("ftbunearthed.gui.food_remaining", +(int) (menu.getFoodBuffer() * ServerConfig.MAX_FOOD_BUFFER.get() / 20)).withStyle(ChatFormatting.GRAY)
+                        Component.translatable("ftbunearthed.gui.speed_boost", + boost),
+                        Component.translatable("ftbunearthed.gui.food_remaining", remaining).withStyle(ChatFormatting.GRAY)
                 ), Optional.empty(), x, y);
             } else {
                 guiGraphics.renderTooltip(font, List.of(
@@ -77,12 +83,16 @@ public class UneartherScreen extends AbstractContainerScreen<UneartherMenu> {
         int uwidth = Mth.ceil(menu.getProgress() * 24.0F);
         guiGraphics.blitSprite(BURN_PROGRESS_SPRITE, 24, 16, 0, 0, leftPos + 86, topPos + 18, uwidth, 16);
 
-        if (menu.getFoodBuffer() > 0f) {
-            int fHeight = Math.max(1, (int) (FOOD_BAR_HEIGHT * menu.getFoodBuffer()));
+        boolean superBrush = menu.getUnearther().hasSuperBrush();
+        float foodBuf = superBrush ? 1f : menu.getFoodBuffer();
+        int colorFrom = superBrush ? 0xFF20A0A0 : 0xFF20A020;
+        int color = superBrush ? 0xFF008080 : 0xFF008000;
+        if (foodBuf > 0f) {
+            int fHeight = Math.max(1, (int) (FOOD_BAR_HEIGHT * foodBuf));
             guiGraphics.fillGradient(
                     leftPos + 8, topPos + 18 + (FOOD_BAR_HEIGHT - fHeight),
                     leftPos + 14, topPos + 18 + FOOD_BAR_HEIGHT + 1,
-                    0xFF20A020, 0xFF008000
+                    colorFrom, color
             );
         }
 

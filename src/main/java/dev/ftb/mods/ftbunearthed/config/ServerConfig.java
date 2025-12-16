@@ -43,6 +43,9 @@ public interface ServerConfig {
     IntValue FOOD_SPEED_BOOST_MULTIPLIER = UNEARTHER.addInt("food_speed_boost_multiplier", 1, 1, Integer.MAX_VALUE)
             .comment("Used to multiply the amount of speed boost a food item can provide");
 
+    IntValue SUPER_BRUSH_SPEED_BOOST = UNEARTHER.addInt("super_brush_speed_boost", 100, 1, Integer.MAX_VALUE)
+            .comment("Speed boost provided when a Super Brush is in use.");
+
 
     static Optional<VillagerType> encodedVillagerType() {
         if (!ENCODED_VILLAGER_TYPE.get().isEmpty()) {
