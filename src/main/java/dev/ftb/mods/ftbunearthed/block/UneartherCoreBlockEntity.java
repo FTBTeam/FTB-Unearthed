@@ -523,6 +523,7 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
                 entity.discard();
             }
         }
+        super.setRemoved();
     }
 
     public void dropItemContents() {
