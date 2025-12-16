@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - When unemployed villagers are spawned from a Worker Token, they no longer get the initial 1 xp
   - Villagers with a job do get the 1 xp (vanilla resets them to unemployed otherwise)
+- Fixed Unearther GUI not closing if the Unearther is broken
 
 ## [21.1.8]
 
