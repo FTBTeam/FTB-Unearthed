@@ -15,6 +15,7 @@ import dev.ftb.mods.ftbunearthed.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
 import dev.ftb.mods.ftbunearthed.registry.ModEntityTypes;
 import dev.ftb.mods.ftbunearthed.registry.ModRecipes;
+import dev.ftb.mods.ftbunearthed.util.MiscUtil;
 import net.minecraft.Util;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
@@ -333,6 +334,13 @@ public class UneartherCoreBlockEntity extends BlockEntity implements MenuProvide
                     foodBuffer = Math.min(ServerConfig.MAX_FOOD_BUFFER.get(), foodBuffer + value * ServerConfig.FOOD_SATURATION_MULTIPLIER.get());
                     currentSpeedBoost = props.nutrition() * ServerConfig.FOOD_SPEED_BOOST_MULTIPLIER.get();
                     level.playSound(null, getBlockPos().above(2), SoundEvents.GENERIC_EAT, SoundSource.BLOCKS, 1f, 1f);
+                    props.usingConvertsTo().ifPresent(remainder -> {
+                        ItemStack excess = ItemHandlerHelper.insertItem(outputHandler, remainder, false);
+                        if (!excess.isEmpty()) {
+                            BlockPos pos = getBlockPos().relative(getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING), 2);
+                            MiscUtil.dropItemAt(level, excess, pos);
+                        }
+                    });
                     setChanged();
                 }
             }
