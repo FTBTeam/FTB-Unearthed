@@ -6,16 +6,12 @@ import dev.ftb.mods.ftbunearthed.registry.ModBlockEntityTypes;
 import dev.ftb.mods.ftbunearthed.registry.ModEntityTypes;
 import dev.ftb.mods.ftbunearthed.registry.ModItems;
 import dev.ftb.mods.ftbunearthed.registry.ModMenuTypes;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-
-import java.util.Collection;
 
 @Mod(value = FTBUnearthed.MODID, dist = Dist.CLIENT)
 public class FTBUnearthedClient {
@@ -45,9 +41,5 @@ public class FTBUnearthedClient {
                                 .orElse(0xFFFFFFFF),
                 ModItems.WORKER_TOKEN.asItem()
         );
-    }
-
-    public static void updateBreakPositions(Collection<BlockPos> positions, int progress) {
-        positions.forEach(pos -> Minecraft.getInstance().level.destroyBlockProgress(-pos.hashCode(), pos, progress));
     }
 }

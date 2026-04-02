@@ -4,12 +4,12 @@ import dev.ftb.mods.ftbunearthed.config.ServerConfig;
 import dev.ftb.mods.ftbunearthed.crafting.RecipeCaches;
 import dev.ftb.mods.ftbunearthed.crafting.recipe.UneartherRecipe;
 import dev.ftb.mods.ftbunearthed.integration.ultimine.UltimineIntegration;
-import dev.ftb.mods.ftbunearthed.net.SendMultibreakProgressMessage;
 import dev.ftb.mods.ftbunearthed.registry.ModDataComponents;
 import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import it.unimi.dsi.fastutil.objects.Object2FloatOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundBlockDestructionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -20,7 +20,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.*;
 
@@ -79,7 +78,7 @@ public class ManualBrushing {
         progressMap.put(pos, progress);
 
         if (progress >= 10f) {
-            sendBreakProgress(player, pos, allPositions, -1);
+            player.connection.send(new ClientboundBlockDestructionPacket(player.getId(), pos, -1));
 
             BlockState origState = level.getBlockState(pos);
             for (BlockPos p1 : allPositions) {
@@ -97,17 +96,9 @@ public class ManualBrushing {
             }
             progressMap.removeFloat(pos);
         } else {
-            sendBreakProgress(player, pos, allPositions, (int) progress);
+            player.connection.send(new ClientboundBlockDestructionPacket(player.getId(), pos, (int) progress));
         }
 
         return true;
-    }
-
-    private static void sendBreakProgress(ServerPlayer player, BlockPos pos0, Collection<BlockPos> allPositions, int progress) {
-        PacketDistributor.sendToPlayersTrackingChunk(
-                player.serverLevel(),
-                player.chunkPosition(),
-                SendMultibreakProgressMessage.create(pos0, allPositions, progress)
-        );
     }
 }
