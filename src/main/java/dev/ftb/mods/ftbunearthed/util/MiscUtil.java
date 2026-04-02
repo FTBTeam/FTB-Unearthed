@@ -3,10 +3,15 @@ package dev.ftb.mods.ftbunearthed.util;
 import com.mojang.serialization.DataResult;
 import dev.ftb.mods.ftbunearthed.registry.ModAttachmentTypes;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.Validate;
 
 public class MiscUtil {
@@ -47,5 +52,13 @@ public class MiscUtil {
                 Component.literal(String.valueOf(lvl)).withStyle(LEVEL_COLORS[lvl - 1]),
                 Component.translatable("merchant.level." + lvl).withStyle(LEVEL_COLORS[lvl - 1])
         );
+    }
+
+    public static void dropItemAt(Level level, ItemStack stack, BlockPos pos) {
+        Vec3 vec = Vec3.atBottomCenterOf(pos);
+        ItemEntity entityItem = new ItemEntity(level, vec.x, vec.y, vec.z, stack.copy());
+
+        entityItem.setDeltaMovement(0, 0, 0);
+        level.addFreshEntity(entityItem);
     }
 }

@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [21.1.10]
+
+### Fixed
+- Remainder items from consumed foods (e.g. wooden bowls from mushroom stew) are no longer discarded
+  - They are moved to the output slots, or dropped on the ground if the output is full
+- Ultimine brushing now just shows block crumbling effect for block being brushed
+  - More consistent with normal Ultimine block breaking
+
 ## [21.1.9]
 
 ### Added
